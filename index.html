@@ -1,0 +1,1927 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JourneyPins</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      crossorigin=""
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;800;900&family=Manrope:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #efe9dc;
+        --cream: #fff8eb;
+        --panel: rgba(255, 251, 241, 0.88);
+        --panel-solid: #fffaf0;
+        --panel-2: #f3ead9;
+        --text: #1f2b2f;
+        --muted: #677171;
+        --line: rgba(61, 74, 66, 0.16);
+        --green: #2c7850;
+        --green-deep: #174b37;
+        --red: #bd4936;
+        --blue: #266da8;
+        --yellow: #d4a62a;
+        --ink: #172223;
+        --shadow: 0 24px 70px rgba(26, 36, 33, 0.18);
+        --soft-shadow: 0 12px 30px rgba(26, 36, 33, 0.10);
+      }
+
+      * { box-sizing: border-box; }
+      html, body { height: 100%; }
+      body {
+        margin: 0;
+        font-family: "Manrope", "Segoe UI", sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at 12% 12%, rgba(189, 73, 54, 0.16), transparent 25%),
+          radial-gradient(circle at 82% 8%, rgba(38, 109, 168, 0.16), transparent 22%),
+          radial-gradient(circle at 40% 92%, rgba(44, 120, 80, 0.18), transparent 34%),
+          linear-gradient(135deg, #f8f0df 0%, #e8dfce 48%, #d8e0d5 100%);
+      }
+
+      .app {
+        display: grid;
+        grid-template-columns: 410px 1fr;
+        min-height: 100vh;
+      }
+
+      .sidebar {
+        position: relative;
+        z-index: 700;
+        padding: 24px;
+        border-right: 1px solid rgba(255, 255, 255, 0.55);
+        background:
+          linear-gradient(180deg, rgba(255, 251, 241, 0.94), rgba(244, 236, 219, 0.88)),
+          radial-gradient(circle at top left, rgba(44, 120, 80, 0.08), transparent 38%);
+        backdrop-filter: blur(18px);
+        box-shadow: 18px 0 55px rgba(26, 36, 33, 0.12);
+        overflow-y: auto;
+      }
+
+      h1 {
+        margin: 0;
+        font-family: "Outfit", "Manrope", sans-serif;
+        font-size: clamp(2.2rem, 5vw, 3rem);
+        line-height: 0.9;
+        letter-spacing: -0.045em;
+        color: var(--ink);
+        text-wrap: balance;
+      }
+
+      h1 .wordmark-accent {
+        color: var(--green-deep);
+      }
+
+      .tagline {
+        margin-top: 6px;
+        color: var(--red);
+        font-size: 0.86rem;
+        font-weight: 800;
+        letter-spacing: 0.01em;
+      }
+
+      .brand-lockup {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 18px;
+      }
+
+      .brand-mark {
+        position: relative;
+        flex: 0 0 auto;
+        width: 58px;
+        height: 58px;
+        border-radius: 20px;
+        background:
+          conic-gradient(from 28deg, var(--red), var(--yellow), var(--green), var(--blue), var(--red));
+        border: 1px solid rgba(255, 255, 255, 0.82);
+        box-shadow: 0 18px 34px rgba(26, 36, 33, 0.2);
+        overflow: hidden;
+        transform: rotate(-8deg);
+      }
+
+      .brand-mark::after {
+        content: "";
+        position: absolute;
+        left: 16px;
+        top: 12px;
+        width: 26px;
+        height: 32px;
+        background:
+          radial-gradient(circle at 50% 36%, var(--ink) 0 4px, transparent 5px),
+          linear-gradient(180deg, #fff8eb, #f1dfb8);
+        clip-path: polygon(50% 100%, 16% 58%, 10% 36%, 17% 16%, 34% 4%, 50% 0, 66% 4%, 83% 16%, 90% 36%, 84% 58%);
+        filter: drop-shadow(0 7px 10px rgba(23, 34, 35, 0.26));
+        transform: rotate(8deg);
+      }
+
+      .brand-mark::before {
+        content: "";
+        position: absolute;
+        inset: 5px;
+        border-radius: 17px;
+        background:
+          linear-gradient(135deg, rgba(255, 255, 255, 0.28), transparent 45%),
+          radial-gradient(circle at 23% 76%, rgba(255, 248, 235, 0.96) 0 3px, transparent 4px),
+          radial-gradient(circle at 77% 25%, rgba(255, 248, 235, 0.96) 0 3px, transparent 4px);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.38);
+      }
+
+      .subtitle, .help, .summary, .footer-note {
+        color: var(--muted);
+        line-height: 1.45;
+      }
+
+      .subtitle {
+        font-size: 0.98rem;
+        max-width: 32ch;
+      }
+
+      .summary {
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: rgba(31, 43, 47, 0.68);
+      }
+
+      .card {
+        margin-top: 18px;
+        padding: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.68);
+        border-radius: 24px;
+        background: var(--panel);
+        box-shadow: var(--soft-shadow);
+        backdrop-filter: blur(16px);
+      }
+
+      .search {
+        width: 100%;
+        padding: 14px 15px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.92);
+        font-size: 1rem;
+        font-family: inherit;
+        outline: none;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+      }
+
+      .search:focus {
+        border-color: rgba(44, 120, 80, 0.48);
+        box-shadow: 0 0 0 4px rgba(44, 120, 80, 0.12);
+        transform: translateY(-1px);
+      }
+
+      .filters {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 12px;
+      }
+
+      .chip {
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 8px 11px;
+        background: rgba(255, 255, 255, 0.74);
+        color: var(--text);
+        cursor: pointer;
+        font-size: 0.84rem;
+        font-weight: 700;
+        font-family: inherit;
+        transition: transform 150ms ease, box-shadow 150ms ease, background 150ms ease;
+      }
+
+      .chip:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 16px rgba(26, 36, 33, 0.08);
+      }
+
+      .chip.active {
+        background: var(--green);
+        color: white;
+        border-color: var(--green);
+      }
+
+      .legend {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+        font-size: 0.93rem;
+      }
+
+      .legend span {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        display: inline-block;
+      }
+
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 12px;
+      }
+
+      .metric {
+        padding: 14px;
+        border-radius: 18px;
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(243, 234, 217, 0.82));
+        border: 1px solid rgba(255, 255, 255, 0.72);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+      }
+
+      .metric strong {
+        display: block;
+        font-family: "Outfit", "Manrope", sans-serif;
+        font-size: 1.75rem;
+        line-height: 1;
+        margin-bottom: 4px;
+      }
+
+      .list {
+        max-height: 48vh;
+        overflow: auto;
+        padding-right: 4px;
+      }
+
+      .park-item {
+        display: grid;
+        gap: 6px;
+        padding: 12px;
+        margin-top: 10px;
+        border-radius: 14px;
+        border: 1px solid var(--line);
+        background: white;
+      }
+
+      .park-item.visited {
+        background: #eff1f3;
+        border-color: #c7cdd3;
+      }
+
+      .park-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .park-title strong {
+        font-size: 1rem;
+      }
+
+      .park-meta {
+        font-size: 0.88rem;
+        color: var(--muted);
+      }
+
+      .action-row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .button {
+        border: 0;
+        border-radius: 999px;
+        padding: 10px 15px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-family: inherit;
+        font-weight: 800;
+        letter-spacing: -0.01em;
+        transition: transform 150ms ease, box-shadow 150ms ease, filter 150ms ease;
+      }
+
+      .button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 20px rgba(26, 36, 33, 0.12);
+      }
+
+      .button.primary {
+        background: var(--green);
+        color: white;
+      }
+
+      .button.primary.visited {
+        background: #7c8792;
+      }
+
+      .button.secondary {
+        background: #e8ecef;
+        color: var(--text);
+      }
+
+      .button.brand-tt {
+        background: linear-gradient(135deg, #1c6036, #2f8d57);
+        color: white;
+      }
+
+      .button.brand-tt-encore {
+        background: #8fd18a;
+        color: #17301a;
+      }
+
+      .button.brand-temple {
+        background: linear-gradient(135deg, #d4a62a, #f2cd63);
+        color: #2f2500;
+      }
+
+      .button.brand-temple-toggle {
+        background: #f4d46f;
+        color: #2f2500;
+      }
+
+      .button.brand-parks {
+        background: linear-gradient(135deg, var(--red), #dd7350);
+        color: white;
+      }
+
+      .button.brand-nps {
+        background: linear-gradient(135deg, var(--blue), #58a4d8);
+        color: white;
+      }
+
+      .button.brand-all {
+        background: linear-gradient(135deg, #172223, #3d4a42);
+        color: white;
+      }
+
+      .button.filter-main {
+        background: linear-gradient(135deg, var(--green), var(--blue));
+        color: white;
+      }
+
+      .button.active {
+        box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.08);
+      }
+
+      .filter-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .filter-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 1200;
+        display: none;
+        align-items: flex-start;
+        justify-content: center;
+        padding: 82px 20px 20px;
+        background: rgba(23, 34, 35, 0.34);
+        backdrop-filter: blur(6px);
+      }
+
+      .filter-overlay.open {
+        display: flex;
+      }
+
+      .filter-modal {
+        width: min(560px, 100%);
+        max-height: min(78vh, 720px);
+        overflow: auto;
+        padding: 18px;
+        border-radius: 26px;
+        background: rgba(255, 250, 241, 0.96);
+        border: 1px solid rgba(255, 255, 255, 0.72);
+        box-shadow: var(--shadow);
+      }
+
+      .filter-modal-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 14px;
+      }
+
+      .filter-modal h2 {
+        margin: 0 0 6px;
+        font-family: "Outfit", "Manrope", sans-serif;
+        font-size: 1.45rem;
+        letter-spacing: -0.035em;
+      }
+
+      .filter-modal-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex: 0 0 auto;
+      }
+
+      .category-tabs {
+        display: grid;
+        gap: 10px;
+      }
+
+      .category-tab-row {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 6px;
+        margin-top: 12px;
+        padding: 6px;
+        border-radius: 20px;
+        background: rgba(23, 34, 35, 0.08);
+      }
+
+      .category-tab {
+        border: 1px solid rgba(255, 255, 255, 0.68);
+        border-radius: 22px;
+        padding: 14px;
+        background: rgba(255, 255, 255, 0.62);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+      }
+
+      .category-tab-button {
+        border: 0;
+        border-radius: 15px;
+        padding: 11px 8px;
+        cursor: pointer;
+        color: white;
+        font-weight: 900;
+        font-family: inherit;
+        font-size: 0.82rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 52px;
+        text-align: center;
+        line-height: 1.1;
+        box-shadow: 0 10px 20px rgba(26, 36, 33, 0.12);
+        transition: transform 150ms ease, box-shadow 150ms ease, filter 150ms ease;
+      }
+
+      .category-tab-button:first-child {
+        border-radius: 15px;
+      }
+
+      .category-tab-button:last-child {
+        border-right: 0;
+        border-radius: 15px;
+      }
+
+      .category-tab-button[data-category-tab="parks"] {
+        background: linear-gradient(135deg, var(--red), #e1844f);
+      }
+
+      .category-tab-button[data-category-tab="nps"] {
+        background: linear-gradient(135deg, var(--blue), #5aa7dd);
+      }
+
+      .category-tab-button[data-category-tab="tt"] {
+        background: linear-gradient(135deg, #1f5c2a, var(--green));
+      }
+
+      .category-tab-button[data-category-tab="temples"] {
+        background: linear-gradient(135deg, #d4a62a, #f3d06d);
+        color: #2f2500;
+      }
+
+      .category-tab-button .dot {
+        display: none;
+      }
+
+      .category-tab-button.active {
+        transform: translateY(-2px);
+        box-shadow: 0 16px 26px rgba(26, 36, 33, 0.18), inset 0 0 0 2px rgba(255, 255, 255, 0.42);
+        filter: saturate(1.08);
+      }
+
+      .category-tab-button:hover {
+        transform: translateY(-1px);
+      }
+
+      .progress-card {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      .progress-card .metric {
+        margin: 0;
+      }
+
+      .category-panel {
+        display: none;
+        padding-top: 10px;
+      }
+
+      .category-panel.active {
+        display: block;
+      }
+
+      .category-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 10px;
+      }
+
+      .category-name {
+        font-weight: 700;
+      }
+
+      .category-count {
+        font-weight: 700;
+        color: var(--text);
+        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 2px 10px;
+      }
+
+      .category-controls {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: space-between;
+      }
+
+      .toggle-row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+      }
+
+      #map {
+        height: 100vh;
+        width: 100%;
+        background: #d9e0d9;
+      }
+
+      .map-panel {
+        position: relative;
+      }
+
+      .map-panel::after {
+        content: "";
+        pointer-events: none;
+        position: absolute;
+        inset: 0;
+        z-index: 450;
+        box-shadow: inset 0 0 120px rgba(23, 34, 35, 0.16);
+      }
+
+      .floating-note {
+        position: absolute;
+        bottom: 12px;
+        left: 16px;
+        z-index: 500;
+        max-width: min(520px, calc(100% - 32px));
+        padding: 0;
+        background: transparent;
+        border: 0;
+        box-shadow: none;
+        color: rgba(31, 43, 47, 0.56);
+        font-size: 0.72rem;
+        line-height: 1.35;
+      }
+
+      .map-quote {
+        position: absolute;
+        left: 50%;
+        right: auto;
+        bottom: 220px;
+        transform: translateX(-50%);
+        z-index: 500;
+        max-width: min(680px, calc(100% - 68px));
+        padding: 24px 32px;
+        border-radius: 32px;
+        background:
+          linear-gradient(135deg, rgba(255, 250, 241, 0.94), rgba(243, 234, 217, 0.9));
+        border: 1px solid rgba(255, 255, 255, 0.72);
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(16px);
+        color: var(--green-deep);
+        font-family: "Outfit", "Manrope", sans-serif;
+        font-size: clamp(1.25rem, 2.1vw, 1.95rem);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        line-height: 1.12;
+        text-align: center;
+      }
+
+      .map-quote.hidden {
+        display: none;
+      }
+
+      .quote-close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 30px;
+        height: 30px;
+        border: 0;
+        border-radius: 999px;
+        background: rgba(23, 34, 35, 0.08);
+        color: var(--ink);
+        cursor: pointer;
+        font-size: 1.1rem;
+        font-weight: 900;
+        line-height: 1;
+      }
+
+      .map-quote::before {
+        content: "";
+        display: block;
+        width: 42px;
+        height: 6px;
+        margin: 0 auto 14px;
+        border-radius: 50%;
+        background: linear-gradient(90deg, var(--red), var(--yellow), var(--green), var(--blue));
+        box-shadow: 0 0 0 5px rgba(44, 120, 80, 0.08);
+      }
+
+      .map-quote .quote-line {
+        display: block;
+      }
+
+      .map-scope-control {
+        background: rgba(255, 250, 241, 0.94);
+        border: 1px solid rgba(255, 255, 255, 0.72);
+        border-radius: 16px;
+        box-shadow: var(--soft-shadow);
+        padding: 8px;
+        backdrop-filter: blur(16px);
+        display: grid;
+        gap: 7px;
+      }
+
+      .map-scope-control button {
+        border: 0;
+        border-radius: 999px;
+        background: linear-gradient(135deg, var(--blue), var(--green));
+        color: white;
+        cursor: pointer;
+        font-family: "Manrope", "Segoe UI", sans-serif;
+        font-size: 0.82rem;
+        font-weight: 800;
+        padding: 9px 12px;
+        white-space: nowrap;
+      }
+
+      .map-scope-control button.secondary-map-button {
+        background: rgba(23, 34, 35, 0.84);
+      }
+
+      .popup strong {
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      .leaflet-popup {
+        max-width: calc(100vw - 32px);
+      }
+
+      .leaflet-popup-content {
+        max-width: min(300px, calc(100vw - 76px));
+      }
+
+      .leaflet-popup-content-wrapper {
+        cursor: grab;
+      }
+
+      .leaflet-popup-content-wrapper.dragging {
+        cursor: grabbing;
+      }
+
+      .popup button {
+        margin-top: 8px;
+        padding: 8px 10px;
+        border: 0;
+        border-radius: 10px;
+        cursor: pointer;
+        background: var(--green);
+        color: white;
+      }
+
+      .popup textarea {
+        width: 100%;
+        min-height: 84px;
+        margin-top: 8px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 8px;
+        font-family: inherit;
+        resize: vertical;
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+
+      @media (max-width: 980px) {
+        .app {
+          grid-template-columns: 1fr;
+        }
+        .sidebar {
+          border-right: 0;
+          border-bottom: 1px solid var(--line);
+          max-height: none;
+        }
+        #map {
+          height: 64vh;
+        }
+        .list {
+          max-height: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="brand-lockup">
+          <div class="brand-mark" aria-hidden="true"></div>
+          <div>
+            <h1>Journey<span class="wordmark-accent">Pins</span></h1>
+            <div class="tagline">Pin every place that matters!</div>
+            <div class="subtitle">
+              Pin your stops, capture your journey, and watch your story grow.
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="summary">Categories</div>
+          <div class="category-tab-row">
+            <button class="category-tab-button active" data-category-tab="parks">National Parks</button>
+            <button class="category-tab-button" data-category-tab="nps">NPS Sites</button>
+            <button class="category-tab-button" data-category-tab="tt">Thousand Trails</button>
+            <button class="category-tab-button" data-category-tab="temples">Temples</button>
+          </div>
+          <div class="category-tabs">
+            <div class="category-panel active" data-category-panel="parks">
+              <div class="category-tab">
+                <div class="category-controls">
+                  <button id="toggleParksMap" class="button brand-parks">On map</button>
+                  <button class="button brand-all" data-toggle-all-categories>All off</button>
+                </div>
+                <div class="progress-card" id="parksProgress"></div>
+              </div>
+            </div>
+            <div class="category-panel" data-category-panel="nps">
+              <div class="category-tab">
+                <div class="category-controls">
+                  <button id="toggleNpsMap" class="button brand-nps">On map</button>
+                  <button class="button brand-all" data-toggle-all-categories>All off</button>
+                </div>
+                <div class="progress-card" id="npsProgress"></div>
+              </div>
+            </div>
+            <div class="category-panel" data-category-panel="tt">
+              <div class="category-tab">
+                <div class="category-controls">
+                  <button id="toggleTtMap" class="button brand-tt">On map</button>
+                  <button class="button brand-all" data-toggle-all-categories>All off</button>
+                </div>
+                <div class="progress-card" id="ttProgress"></div>
+              </div>
+            </div>
+            <div class="category-panel" data-category-panel="temples">
+              <div class="category-tab">
+                <div class="category-controls">
+                  <button id="toggleTemplesMap" class="button brand-temple">On map</button>
+                  <button class="button brand-all" data-toggle-all-categories>All off</button>
+                </div>
+                <div class="progress-card" id="templeProgress"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="filter-actions">
+            <button id="openFilterModal" class="button filter-main">Filter</button>
+            <button id="clearFilters" class="button secondary">Clear filters</button>
+          </div>
+        </div>
+      </aside>
+
+      <main class="map-panel">
+        <div id="map"></div>
+        <div class="floating-note">
+          * The app saves your checkmarks on this device in your browser. Clear browser data and the progress resets.
+        </div>
+        <div id="mapQuote" class="map-quote">
+          <button id="closeMapQuote" class="quote-close" aria-label="Close quote">&times;</button>
+          <span class="quote-line">It’s more than a map.</span>
+          <span class="quote-line">It’s the story of where life has taken you.</span>
+        </div>
+      </main>
+    </div>
+
+    <div id="filterOverlay" class="filter-overlay" aria-hidden="true">
+      <div class="filter-modal" role="dialog" aria-modal="true" aria-labelledby="filterTitle">
+        <div class="filter-modal-head">
+          <div>
+            <h2 id="filterTitle">Filter map</h2>
+            <div class="help">Filter by free texting in the box or selecting a state tile below.</div>
+          </div>
+          <div class="filter-modal-actions">
+            <button id="applyFilters" class="button filter-main">Apply</button>
+          </div>
+        </div>
+        <input id="search" class="search" type="search" placeholder="Filter parks, states, or temples" style="margin-top:14px;" />
+        <div class="filter-actions" style="margin-top:12px;">
+          <button id="visitedOnlyFilter" class="button secondary">Show places I’ve been</button>
+        </div>
+        <div id="stateFilters" class="filters"></div>
+      </div>
+    </div>
+
+      <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+      <script>
+      const parks = [
+        { name: "Acadia National Park", states: ["ME"], lat: 44.30777545, lng: -68.30063316, type: "park" },
+        { name: "National Park of American Samoa", states: ["AS"], lat: -14.25, lng: -170.68, type: "park" },
+        { name: "Arches National Park", states: ["UT"], lat: 38.72261844, lng: -109.5863666, type: "park" },
+        { name: "Badlands National Park", states: ["SD"], lat: 43.75, lng: -102.5, type: "park" },
+        { name: "Big Bend National Park", states: ["TX"], lat: 29.25, lng: -103.25, type: "park" },
+        { name: "Biscayne National Park", states: ["FL"], lat: 25.49, lng: -80.17, type: "park" },
+        { name: "Black Canyon of the Gunnison National Park", states: ["CO"], lat: 38.57, lng: -107.72, type: "park" },
+        { name: "Bryce Canyon National Park", states: ["UT"], lat: 37.59, lng: -112.18, type: "park" },
+        { name: "Canyonlands National Park", states: ["UT"], lat: 38.2, lng: -109.93, type: "park" },
+        { name: "Capitol Reef National Park", states: ["UT"], lat: 38.2, lng: -111.17, type: "park" },
+        { name: "Carlsbad Caverns National Park", states: ["NM"], lat: 32.17, lng: -104.44, type: "park" },
+        { name: "Channel Islands National Park", states: ["CA"], lat: 33.98, lng: -119.82, type: "park" },
+        { name: "Congaree National Park", states: ["SC"], lat: 33.79, lng: -80.79, type: "park" },
+        { name: "Crater Lake National Park", states: ["OR"], lat: 42.94, lng: -122.11, type: "park" },
+        { name: "Cuyahoga Valley National Park", states: ["OH"], lat: 41.24, lng: -81.56, type: "park" },
+        { name: "Death Valley National Park", states: ["CA", "NV"], lat: 36.48753731, lng: -117.134395, type: "park" },
+        { name: "Denali National Park", states: ["AK"], lat: 63.33, lng: -150.5, type: "park" },
+        { name: "Dry Tortugas National Park", states: ["FL"], lat: 24.63, lng: -82.87, type: "park" },
+        { name: "Everglades National Park", states: ["FL"], lat: 25.32, lng: -80.93, type: "park" },
+        { name: "Gates of the Arctic National Park", states: ["AK"], lat: 67.78, lng: -153.3, type: "park" },
+        { name: "Gateway Arch National Park", states: ["MO", "IL"], lat: 38.63, lng: -90.19, type: "park" },
+        { name: "Glacier Bay National Park", states: ["AK"], lat: 58.5, lng: -137.0, type: "park" },
+        { name: "Glacier National Park", states: ["MT"], lat: 48.68414678, lng: -113.8009306, type: "park" },
+        { name: "Grand Canyon National Park", states: ["AZ"], lat: 36.17280161, lng: -112.6836024, type: "park" },
+        { name: "Grand Teton National Park", states: ["WY"], lat: 43.81853565, lng: -110.7054666, type: "park" },
+        { name: "Great Basin National Park", states: ["NV"], lat: 38.98, lng: -114.3, type: "park" },
+        { name: "Great Sand Dunes National Park", states: ["CO"], lat: 37.73, lng: -105.51, type: "park" },
+        { name: "Great Smoky Mountains National Park", states: ["TN", "NC"], lat: 35.68, lng: -83.53, type: "park" },
+        { name: "Guadalupe Mountains National Park", states: ["TX"], lat: 31.92, lng: -104.87, type: "park" },
+        { name: "Haleakalā National Park", states: ["HI"], lat: 20.72, lng: -156.17, type: "park" },
+        { name: "Hawai'i Volcanoes National Park", states: ["HI"], lat: 19.38, lng: -155.2, type: "park" },
+        { name: "Hot Springs National Park", states: ["AR"], lat: 34.51, lng: -93.05, type: "park" },
+        { name: "Indiana Dunes National Park", states: ["IN"], lat: 41.65, lng: -87.05, type: "park" },
+        { name: "Isle Royale National Park", states: ["MI"], lat: 48.0, lng: -88.83, type: "park" },
+        { name: "Joshua Tree National Park", states: ["CA"], lat: 33.79, lng: -115.9, type: "park" },
+        { name: "Katmai National Park", states: ["AK"], lat: 58.62235668, lng: -155.0126574, type: "park" },
+        { name: "Kenai Fjords National Park", states: ["AK"], lat: 59.92, lng: -149.65, type: "park" },
+        { name: "Kings Canyon National Park", states: ["CA"], lat: 36.79, lng: -118.56, type: "park" },
+        { name: "Kobuk Valley National Park", states: ["AK"], lat: 67.35, lng: -159.2, type: "park" },
+        { name: "Lake Clark National Park", states: ["AK"], lat: 60.97, lng: -153.42, type: "park" },
+        { name: "Lassen Volcanic National Park", states: ["CA"], lat: 40.49, lng: -121.51, type: "park" },
+        { name: "Mammoth Cave National Park", states: ["KY"], lat: 37.18, lng: -86.1, type: "park" },
+        { name: "Mesa Verde National Park", states: ["CO"], lat: 37.23, lng: -108.46, type: "park" },
+        { name: "Mount Rainier National Park", states: ["WA"], lat: 46.86075416, lng: -121.7043885, type: "park" },
+        { name: "New River Gorge National Park and Preserve", states: ["WV"], lat: 38.07, lng: -81.08, type: "park" },
+        { name: "North Cascades National Park", states: ["WA"], lat: 48.7, lng: -121.2, type: "park" },
+        { name: "Olympic National Park", states: ["WA"], lat: 47.80392754, lng: -123.6663848, type: "park" },
+        { name: "Petrified Forest National Park", states: ["AZ"], lat: 35.07, lng: -109.78, type: "park" },
+        { name: "Pinnacles National Park", states: ["CA"], lat: 36.49, lng: -121.16, type: "park" },
+        { name: "Redwood National Park", states: ["CA"], lat: 41.3, lng: -124.0, type: "park" },
+        { name: "Rocky Mountain National Park", states: ["CO"], lat: 40.34, lng: -105.68, type: "park" },
+        { name: "Saguaro National Park", states: ["AZ"], lat: 32.25, lng: -110.5, type: "park" },
+        { name: "Sequoia National Park", states: ["CA"], lat: 36.49, lng: -118.78, type: "park" },
+        { name: "Shenandoah National Park", states: ["VA"], lat: 38.53, lng: -78.35, type: "park" },
+        { name: "Theodore Roosevelt National Park", states: ["ND"], lat: 46.97, lng: -103.45, type: "park" },
+        { name: "Virgin Islands National Park", states: ["VI"], lat: 18.34, lng: -64.74, type: "park" },
+        { name: "Voyageurs National Park", states: ["MN"], lat: 48.47, lng: -92.88, type: "park" },
+        { name: "White Sands National Park", states: ["NM"], lat: 32.78, lng: -106.17, type: "park" },
+        { name: "Wind Cave National Park", states: ["SD"], lat: 43.58012365, lng: -103.4394709, type: "park" },
+        { name: "Wrangell-St. Elias National Park", states: ["AK"], lat: 61.75, lng: -142.99, type: "park" },
+        { name: "Yellowstone National Park", states: ["WY", "MT", "ID"], lat: 44.6, lng: -110.5, type: "park" },
+        { name: "Yosemite National Park", states: ["CA"], lat: 37.84883288, lng: -119.5571873, type: "park" },
+        { name: "Zion National Park", states: ["UT"], lat: 37.3, lng: -113.02, type: "park" }
+      ];
+
+      const stateNames = {
+        AK: "Alaska", AL: "Alabama", AR: "Arkansas", AZ: "Arizona", CA: "California", CO: "Colorado",
+        CT: "Connecticut", DC: "District of Columbia", DE: "Delaware", FL: "Florida", GA: "Georgia",
+        HI: "Hawaii", IA: "Iowa", ID: "Idaho", IL: "Illinois", IN: "Indiana", KS: "Kansas", KY: "Kentucky",
+        LA: "Louisiana", MA: "Massachusetts", MD: "Maryland", ME: "Maine", MI: "Michigan", MN: "Minnesota",
+        MO: "Missouri", MS: "Mississippi", MT: "Montana", NC: "North Carolina", ND: "North Dakota", NE: "Nebraska",
+        NH: "New Hampshire", NJ: "New Jersey", NM: "New Mexico", NV: "Nevada", NY: "New York", OH: "Ohio",
+        OK: "Oklahoma", OR: "Oregon", PA: "Pennsylvania", RI: "Rhode Island", SC: "South Carolina", SD: "South Dakota",
+        TN: "Tennessee", TX: "Texas", UT: "Utah", VA: "Virginia", VI: "U.S. Virgin Islands", VT: "Vermont",
+        WA: "Washington", WI: "Wisconsin", WV: "West Virginia", WY: "Wyoming"
+      };
+
+      const storageKey = "npb-visited-v1";
+      const npsStorageKey = "npb-nps-visited-v1";
+      const ttVisitedKey = "npb-tt-visited-v1";
+      const ttNotesKey = "npb-tt-notes-v1";
+      const templeCompleteKey = "npb-temple-complete-v1";
+      const bundledNpsApiKey = "NHwal6BG71ikZNdXYqOQ0QR390ap0cTWhHO8XUtI";
+      const visited = new Set(JSON.parse(localStorage.getItem(storageKey) || "[]"));
+      const visitedSites = new Set(JSON.parse(localStorage.getItem(npsStorageKey) || "[]"));
+      const ttVisited = new Set(JSON.parse(localStorage.getItem(ttVisitedKey) || "[]"));
+      const ttNotes = JSON.parse(localStorage.getItem(ttNotesKey) || "{}");
+      const templeComplete = new Set(JSON.parse(localStorage.getItem(templeCompleteKey) || "[]"));
+      const stateFilter = new Set();
+      let searchTerm = "";
+      let allUnits = parks.slice();
+      let loadError = "";
+      let showParksOnMap = true;
+      let showNpsOnMap = false;
+      let showTtOnMap = false;
+      let showTemplesOnMap = false;
+      const ttLocations = [
+        { name: "Moody Beach", brand: "tt", city: "Wells", state: "ME", lat: 43.309, lng: -70.574 },
+        { name: "Gateway to Cape Cod", brand: "tt", city: "Rochester", state: "MA", lat: 41.738, lng: -70.780 },
+        { name: "Sturbridge", brand: "tt", city: "Sturbridge", state: "MA", lat: 42.103, lng: -72.083 },
+        { name: "Sea Pines", brand: "tt", city: "Swainton", state: "NJ", lat: 39.165, lng: -74.907 },
+        { name: "Lake & Shore", brand: "tt", city: "Ocean View", state: "NJ", lat: 39.221, lng: -74.712 },
+        { name: "Chestnut Lake", brand: "tt", city: "Port Republic", state: "NJ", lat: 39.520, lng: -74.488 },
+        { name: "Rondout Valley", brand: "tt", city: "Accord", state: "NY", lat: 41.794, lng: -74.229 },
+        { name: "Scotrun", brand: "tt", city: "Scotrun", state: "PA", lat: 41.099, lng: -75.308 },
+        { name: "PA Dutch Country", brand: "tt", city: "Manheim", state: "PA", lat: 40.165, lng: -76.399 },
+        { name: "Hershey", brand: "tt", city: "Lebanon", state: "PA", lat: 40.363, lng: -76.385 },
+        { name: "Gettysburg Farm", brand: "tt", city: "Dover", state: "PA", lat: 39.951, lng: -76.725 },
+        { name: "Circle M", brand: "tt", city: "Lancaster", state: "PA", lat: 40.072, lng: -76.301 },
+        { name: "Timothy Lake South", brand: "tt", city: "East Stroudsburg", state: "PA", lat: 41.096, lng: -75.063 },
+        { name: "Timothy Lake North", brand: "tt", city: "East Stroudsburg", state: "PA", lat: 41.097, lng: -75.060 },
+        { name: "Hidden Cove", brand: "tt", city: "Arley", state: "AL", lat: 34.092, lng: -87.210 },
+        { name: "Three Flags", brand: "tt", city: "Wildwood", state: "FL", lat: 28.883, lng: -82.021 },
+        { name: "Peace River", brand: "tt", city: "Wauchula", state: "FL", lat: 27.554, lng: -81.826 },
+        { name: "Orlando", brand: "tt", city: "Clermont", state: "FL", lat: 28.523, lng: -81.704 },
+        { name: "Forest Lake", brand: "tt", city: "Advance", state: "NC", lat: 35.916, lng: -80.452 },
+        { name: "Lake Gaston", brand: "tt", city: "Littleton", state: "NC", lat: 36.520, lng: -77.938 },
+        { name: "Green Mountain", brand: "tt", city: "Lenoir", state: "NC", lat: 35.952, lng: -81.536 },
+        { name: "The Oaks at Point South", brand: "tt", city: "Yemassee", state: "SC", lat: 32.690, lng: -80.856 },
+        { name: "Carolina Landing", brand: "tt", city: "Fair Play", state: "SC", lat: 34.486, lng: -82.955 },
+        { name: "Natchez Trace", brand: "tt", city: "Hohenwald", state: "TN", lat: 35.544, lng: -87.553 },
+        { name: "Cherokee Landing", brand: "tt", city: "Saulsbury", state: "TN", lat: 35.181, lng: -88.446 },
+        { name: "Lake Conroe", brand: "tt", city: "Willis", state: "TX", lat: 30.424, lng: -95.494 },
+        { name: "Colorado River", brand: "tt", city: "Columbus", state: "TX", lat: 29.717, lng: -96.557 },
+        { name: "Bay Landing", brand: "tt", city: "Bridgeport", state: "TX", lat: 33.217, lng: -97.801 },
+        { name: "Lake Tawakoni", brand: "tt", city: "Point", state: "TX", lat: 32.942, lng: -95.883 },
+        { name: "Medina Lake", brand: "tt", city: "Lakehills", state: "TX", lat: 29.662, lng: -98.958 },
+        { name: "Lake Whitney", brand: "tt", city: "Whitney", state: "TX", lat: 31.951, lng: -97.342 },
+        { name: "Lake Texoma", brand: "tt", city: "Gordonville", state: "TX", lat: 33.793, lng: -96.886 },
+        { name: "Williamsburg", brand: "tt", city: "Williamsburg", state: "VA", lat: 37.245, lng: -76.769 },
+        { name: "Virginia Landing", brand: "tt", city: "Quinby", state: "VA", lat: 37.650, lng: -75.687 },
+        { name: "Lynchburg", brand: "tt", city: "Gladys", state: "VA", lat: 37.412, lng: -79.026 },
+        { name: "Harbor View", brand: "tt", city: "Colonial Beach", state: "VA", lat: 38.250, lng: -76.962 },
+        { name: "Chesapeake Bay", brand: "tt", city: "Gloucester", state: "VA", lat: 37.423, lng: -76.519 },
+        { name: "Cultus Lake", brand: "tt", city: "Lindell Beach", state: "BC", lat: 49.061, lng: -122.025 },
+        { name: "Bend-Sunriver", brand: "tt", city: "Bend", state: "OR", lat: 43.846, lng: -121.438 },
+        { name: "Pacific City", brand: "tt", city: "Cloverdale", state: "OR", lat: 45.210, lng: -123.953 },
+        { name: "Seaside", brand: "tt", city: "Seaside", state: "OR", lat: 46.019, lng: -123.923 },
+        { name: "Whalers Rest", brand: "tt", city: "South Beach", state: "OR", lat: 44.608, lng: -124.060 },
+        { name: "South Jetty", brand: "tt", city: "Florence", state: "OR", lat: 43.963, lng: -124.115 },
+        { name: "La Conner", brand: "tt", city: "La Conner", state: "WA", lat: 48.391, lng: -122.498 },
+        { name: "Grandy Creek", brand: "tt", city: "Concrete", state: "WA", lat: 48.534, lng: -121.745 },
+        { name: "Crescent Bar", brand: "tt", city: "Quincy", state: "WA", lat: 47.225, lng: -119.949 },
+        { name: "Chehalis", brand: "tt", city: "Chehalis", state: "WA", lat: 46.668, lng: -122.962 },
+        { name: "Birch Bay", brand: "tt", city: "Blaine", state: "WA", lat: 48.954, lng: -122.760 },
+        { name: "Leavenworth", brand: "tt", city: "Leavenworth", state: "WA", lat: 47.597, lng: -120.660 },
+        { name: "Little Diamond", brand: "tt", city: "Newport", state: "WA", lat: 48.113, lng: -117.258 },
+        { name: "Long Beach", brand: "tt", city: "Seaview", state: "WA", lat: 46.354, lng: -124.045 },
+        { name: "Thunderbird", brand: "tt", city: "Monroe", state: "WA", lat: 47.859, lng: -122.021 },
+        { name: "Paradise", brand: "tt", city: "Silver Creek", state: "WA", lat: 47.141, lng: -122.129 },
+        { name: "Oceana", brand: "tt", city: "Ocean City", state: "WA", lat: 47.127, lng: -124.174 },
+        { name: "Mount Vernon", brand: "tt", city: "Bow", state: "WA", lat: 48.566, lng: -122.394 },
+        { name: "Verde Valley", brand: "tt", city: "Cottonwood", state: "AZ", lat: 34.717, lng: -111.997 },
+        { name: "Snowflower", brand: "tt", city: "Emigrant Gap", state: "CA", lat: 39.307, lng: -120.685 },
+        { name: "Lake of the Springs", brand: "tt", city: "Oregon House", state: "CA", lat: 39.431, lng: -121.289 },
+        { name: "Lake Minden", brand: "tt", city: "Nicolaus", state: "CA", lat: 38.943, lng: -121.551 },
+        { name: "Idyllwild", brand: "tt", city: "Idyllwild", state: "CA", lat: 33.741, lng: -116.718 },
+        { name: "Morgan Hill", brand: "tt", city: "Morgan Hill", state: "CA", lat: 37.148, lng: -121.647 },
+        { name: "Oakzanita Springs", brand: "tt", city: "Descanso", state: "CA", lat: 32.874, lng: -116.610 },
+        { name: "San Benito", brand: "tt", city: "Paicines", state: "CA", lat: 36.467, lng: -121.076 },
+        { name: "Russian River", brand: "tt", city: "Cloverdale", state: "CA", lat: 38.793, lng: -123.002 },
+        { name: "Rancho Oso", brand: "tt", city: "Santa Barbara", state: "CA", lat: 34.639, lng: -119.636 },
+        { name: "Ponderosa", brand: "tt", city: "Lotus", state: "CA", lat: 38.801, lng: -120.937 },
+        { name: "Pio Pico", brand: "tt", city: "Jamul", state: "CA", lat: 32.701, lng: -116.845 },
+        { name: "Palm Springs", brand: "tt", city: "Palm Desert", state: "CA", lat: 33.760, lng: -116.371 },
+        { name: "Yosemite Lakes", brand: "tt", city: "Groveland", state: "CA", lat: 37.863, lng: -120.080 },
+        { name: "Wilderness Lakes RV Resort", brand: "tt", city: "Menifee", state: "CA", lat: 33.700, lng: -117.193 },
+        { name: "Turtle Beach", brand: "tt", city: "Manteca", state: "CA", lat: 37.793, lng: -121.224 },
+        { name: "Soledad Canyon", brand: "tt", city: "Acton", state: "CA", lat: 34.493, lng: -118.188 },
+        { name: "Blue Mesa Recreational Ranch", brand: "tt", city: "Gunnison", state: "CO", lat: 38.462, lng: -107.326 },
+        { name: "Las Vegas", brand: "tt", city: "Las Vegas", state: "NV", lat: 36.153, lng: -115.136 },
+        { name: "Pine Country", brand: "tt", city: "Belvidere", state: "IL", lat: 42.254, lng: -88.852 },
+        { name: "Indian Lakes", brand: "tt", city: "Batesville", state: "IN", lat: 39.304, lng: -85.222 },
+        { name: "Horseshoe Lakes", brand: "tt", city: "Clinton", state: "IN", lat: 39.663, lng: -87.441 },
+        { name: "Diamond Caverns RV & Golf Resort", brand: "tt", city: "Park City", state: "KY", lat: 37.102, lng: -86.034 },
+        { name: "Bear Cave", brand: "tt", city: "Buchanan", state: "MI", lat: 41.842, lng: -86.368 },
+        { name: "St. Clair", brand: "tt", city: "Saint Clair", state: "MI", lat: 42.824, lng: -82.505 },
+        { name: "Wilmington", brand: "tt", city: "Wilmington", state: "OH", lat: 39.445, lng: -83.828 },
+        { name: "Kenisee Lake", brand: "tt", city: "Jefferson", state: "OH", lat: 41.724, lng: -80.782 },
+        { name: "Lake George Escape", brand: "encore", city: "Lake George", state: "NY", lat: 43.43, lng: -73.71 },
+        { name: "Tahoe Valley RV Resort", brand: "encore", city: "South Lake Tahoe", state: "CA", lat: 38.91, lng: -119.99 },
+        { name: "Carolina Shores RV Resort", brand: "encore", city: "Myrtle Beach", state: "SC", lat: 33.77, lng: -78.86 },
+        { name: "Oceanside RV Resort", brand: "encore", city: "Oceanside", state: "CA", lat: 33.20, lng: -117.38 },
+        { name: "Sunshine Key RV Resort & Marina", brand: "encore", city: "Big Pine Key", state: "FL", lat: 24.67, lng: -81.35 },
+        { name: "Fiesta Key RV Resort & Marina", brand: "encore", city: "Long Key", state: "FL", lat: 24.82, lng: -80.83 },
+        { name: "Victoria Palms RV Resort", brand: "encore", city: "Donna", state: "TX", lat: 26.18, lng: -98.05 }
+      ];
+
+      const templeLocations = [
+        { name: "Laie Hawaii Temple", city: "Laie", state: "HI", lat: 21.654, lng: -157.921 },
+        { name: "Logan Utah Temple", city: "Logan", state: "UT", lat: 41.732, lng: -111.834 },
+        { name: "Las Vegas Nevada Temple", city: "Las Vegas", state: "NV", lat: 36.174, lng: -115.142 },
+        { name: "Ogden Utah Temple", city: "Ogden", state: "UT", lat: 41.227, lng: -111.969 },
+        { name: "Orlando Florida Temple", city: "Windermere", state: "FL", lat: 28.481, lng: -81.532 },
+        { name: "Provo Utah Rock Canyon Temple", city: "Provo", state: "UT", lat: 40.249, lng: -111.634 },
+        { name: "Provo City Center Temple", city: "Provo", state: "UT", lat: 40.233, lng: -111.658 },
+        { name: "St. George Utah Temple", city: "St. George", state: "UT", lat: 37.109, lng: -113.584 },
+        { name: "Nashville Tennessee Temple", city: "Franklin", state: "TN", lat: 35.925, lng: -86.870 },
+        { name: "Vernal Utah Temple", city: "Vernal", state: "UT", lat: 40.452, lng: -109.530 },
+        { name: "Boston Massachusetts Temple", city: "Belmont", state: "MA", lat: 42.384, lng: -71.190 },
+        { name: "Mount Timpanogos Utah Temple", city: "American Fork", state: "UT", lat: 40.449, lng: -111.775 },
+        { name: "Moses Lake Washington Temple", city: "Moses Lake", state: "WA", lat: 47.125, lng: -119.281 },
+        { name: "St. Louis Missouri Temple", city: "St. Louis", state: "MO", lat: 38.639, lng: -90.573 },
+        { name: "Mesa Arizona Temple", city: "Mesa", state: "AZ", lat: 33.502, lng: -111.822 },
+        { name: "Boise Idaho Temple", city: "Boise", state: "ID", lat: 43.618, lng: -116.257 },
+        { name: "Deseret Peak Utah Temple", city: "Tooele", state: "UT", lat: 40.540, lng: -112.314 },
+        { name: "Chicago Illinois Temple", city: "Glenview", state: "IL", lat: 42.108, lng: -87.807 },
+        { name: "Kansas City Missouri Temple", city: "Kansas City", state: "MO", lat: 39.012, lng: -94.575 },
+        { name: "Denver Colorado Temple", city: "Centennial", state: "CO", lat: 39.596, lng: -104.865 },
+        { name: "Philadelphia Pennsylvania Temple", city: "Philadelphia", state: "PA", lat: 40.079, lng: -75.169 },
+        { name: "Atlanta Georgia Temple", city: "Sandy Springs", state: "GA", lat: 33.945, lng: -84.352 },
+        { name: "Bountiful Utah Temple", city: "Bountiful", state: "UT", lat: 40.890, lng: -111.882 },
+        { name: "Dallas Texas Temple", city: "Dallas", state: "TX", lat: 32.927, lng: -96.785 },
+        { name: "Idaho Falls Idaho Temple", city: "Idaho Falls", state: "ID", lat: 43.482, lng: -112.018 },
+        { name: "Jordan River Utah Temple", city: "South Jordan", state: "UT", lat: 40.576, lng: -111.949 },
+        { name: "Los Angeles California Temple", city: "Los Angeles", state: "CA", lat: 34.040, lng: -118.246 },
+        { name: "Manti Utah Temple", city: "Manti", state: "UT", lat: 39.265, lng: -111.636 },
+        { name: "Nauvoo Illinois Temple", city: "Nauvoo", state: "IL", lat: 40.544, lng: -91.385 },
+        { name: "Oakland California Temple", city: "Oakland", state: "CA", lat: 37.804, lng: -122.253 },
+        { name: "Seattle Washington Temple", city: "Bellevue", state: "WA", lat: 47.610, lng: -122.201 },
+        { name: "Salt Lake Temple", city: "Salt Lake City", state: "UT", lat: 40.770, lng: -111.893 },
+        { name: "Washington D.C. Temple", city: "Kensington", state: "MD", lat: 39.018, lng: -77.078 },
+        { name: "Billings Montana Temple", city: "Billings", state: "MT", lat: 45.810, lng: -108.558 },
+        { name: "Portland Oregon Temple", city: "Lake Oswego", state: "OR", lat: 45.416, lng: -122.672 },
+        { name: "San Diego California Temple", city: "San Diego", state: "CA", lat: 32.854, lng: -117.233 },
+        { name: "Manhattan New York Temple", city: "New York", state: "NY", lat: 40.752, lng: -73.979 },
+        { name: "Baton Rouge Louisiana Temple", city: "Baton Rouge", state: "LA", lat: 30.373, lng: -91.120 },
+        { name: "Birmingham Alabama Temple", city: "Gardendale", state: "AL", lat: 33.664, lng: -86.813 },
+        { name: "Columbia South Carolina Temple", city: "Hopkins", state: "SC", lat: 33.906, lng: -80.920 },
+        { name: "Memphis Tennessee Temple", city: "Bartlett", state: "TN", lat: 35.212, lng: -89.792 },
+        { name: "Vancouver Washington Temple", city: "Vancouver", state: "WA", lat: 45.629, lng: -122.669 },
+        { name: "Cedar City Utah Temple", city: "Cedar City", state: "UT", lat: 37.676, lng: -113.061 },
+        { name: "Anchorage Alaska Temple", city: "Anchorage", state: "AK", lat: 61.166, lng: -149.840 },
+        { name: "Bismarck North Dakota Temple", city: "Bismarck", state: "ND", lat: 46.859, lng: -100.820 },
+        { name: "Columbus Ohio Temple", city: "Columbus", state: "OH", lat: 40.079, lng: -82.886 },
+        { name: "Detroit Michigan Temple", city: "Bloomfield Hills", state: "MI", lat: 42.596, lng: -83.246 },
+        { name: "Hartford Connecticut Temple", city: "Farmington", state: "CT", lat: 41.704, lng: -72.827 },
+        { name: "Indianapolis Indiana Temple", city: "Carmel", state: "IN", lat: 39.988, lng: -86.128 },
+        { name: "Raleigh North Carolina Temple", city: "Apex", state: "NC", lat: 35.732, lng: -78.850 },
+        { name: "Gilbert Arizona Temple", city: "Gilbert", state: "AZ", lat: 33.352, lng: -111.789 },
+        { name: "The Gila Valley Arizona Temple", city: "Central", state: "AZ", lat: 32.873, lng: -109.788 },
+        { name: "Twin Falls Idaho Temple", city: "Twin Falls", state: "ID", lat: 42.563, lng: -114.461 },
+        { name: "Winter Quarters Nebraska Temple", city: "Omaha", state: "NE", lat: 41.306, lng: -95.998 },
+        { name: "Draper Utah Temple", city: "Draper", state: "UT", lat: 40.524, lng: -111.863 },
+        { name: "Oquirrh Mountain Utah Temple", city: "South Jordan", state: "UT", lat: 40.563, lng: -112.014 },
+        { name: "Saratoga Springs Utah Temple", city: "Saratoga Springs", state: "UT", lat: 40.350, lng: -111.905 },
+        { name: "Phoenix Arizona Temple", city: "Phoenix", state: "AZ", lat: 33.695, lng: -112.100 },
+        { name: "Albuquerque New Mexico Temple", city: "Albuquerque", state: "NM", lat: 35.084, lng: -106.650 },
+        { name: "Snowflake Arizona Temple", city: "Snowflake", state: "AZ", lat: 34.514, lng: -110.078 },
+        { name: "Columbia River Washington Temple", city: "Richland", state: "WA", lat: 46.286, lng: -119.284 },
+        { name: "Houston Texas Temple", city: "Spring", state: "TX", lat: 30.080, lng: -95.417 },
+        { name: "Kona Hawaii Temple", city: "Kailua-Kona", state: "HI", lat: 19.640, lng: -155.996 },
+        { name: "St. Paul Minnesota Temple", city: "Oakdale", state: "MN", lat: 44.963, lng: -92.965 },
+        { name: "Spokane Washington Temple", city: "Spokane", state: "WA", lat: 47.658, lng: -117.426 },
+        { name: "Tucson Arizona Temple", city: "Tucson", state: "AZ", lat: 32.222, lng: -110.974 },
+        { name: "Harrisburg Pennsylvania Temple", city: "Harrisburg", state: "PA", lat: 40.273, lng: -76.884 },
+        { name: "Charlotte North Carolina Temple", city: "Charlotte", state: "NC", lat: 35.227, lng: -80.843 },
+        { name: "Winchester Virginia Temple", city: "Winchester", state: "VA", lat: 39.185, lng: -78.163 },
+        { name: "Springfield Missouri Temple", city: "Springfield", state: "MO", lat: 37.208, lng: -93.292 },
+        { name: "Bakersfield California Temple", city: "Bakersfield", state: "CA", lat: 35.373, lng: -119.019 },
+        { name: "Sunnyvale California Temple", city: "Sunnyvale", state: "CA", lat: 37.368, lng: -122.036 },
+        { name: "Portland Maine Temple", city: "Portland", state: "ME", lat: 43.659, lng: -70.256 },
+        { name: "West Jordan Utah Temple", city: "West Jordan", state: "UT", lat: 40.609, lng: -111.939 },
+        { name: "Lehi Utah Temple", city: "Lehi", state: "UT", lat: 40.391, lng: -111.850 },
+        { name: "Cincinnati Ohio Temple", city: "Cincinnati", state: "OH", lat: 39.103, lng: -84.512 },
+        { name: "Des Moines Iowa Temple", city: "Des Moines", state: "IA", lat: 41.586, lng: -93.625 },
+        { name: "Fort Bend Texas Temple", city: "Richmond", state: "TX", lat: 29.582, lng: -95.760 },
+        { name: "Yuma Arizona Temple", city: "Yuma", state: "AZ", lat: 32.692, lng: -114.627 },
+        { name: "Honolulu Hawaii Temple", city: "Honolulu", state: "HI", lat: 21.306, lng: -157.858 },
+        { name: "Missoula Montana Temple", city: "Missoula", state: "MT", lat: 46.872, lng: -113.994 },
+        { name: "Austin Texas Temple", city: "Austin", state: "TX", lat: 30.267, lng: -97.743 },
+        { name: "Wichita Kansas Temple", city: "Wichita", state: "KS", lat: 37.687, lng: -97.330 },
+        { name: "Cleveland Ohio Temple", city: "Cleveland", state: "OH", lat: 41.499, lng: -81.695 },
+        { name: "Knoxville Tennessee Temple", city: "Knoxville", state: "TN", lat: 35.960, lng: -83.920 },
+        { name: "Tampa Florida Temple", city: "Tampa", state: "FL", lat: 27.950, lng: -82.457 },
+        { name: "Norfolk Virginia Temple", city: "Norfolk", state: "VA", lat: 36.850, lng: -76.285 },
+        { name: "Greenville South Carolina Temple", city: "Greenville", state: "SC", lat: 34.852, lng: -82.394 },
+        { name: "Rapid City South Dakota Temple", city: "Rapid City", state: "SD", lat: 44.080, lng: -103.231 },
+        { name: "Pittsburgh Pennsylvania Temple", city: "Cranberry Township", state: "PA", lat: 40.684, lng: -80.106 },
+        { name: "Tallahassee Florida Temple", city: "Tallahassee", state: "FL", lat: 30.438, lng: -84.281 },
+        { name: "Fairbanks Alaska Temple", city: "Fairbanks", state: "AK", lat: 64.837, lng: -147.716 },
+        { name: "Kahului Hawaii Temple", city: "Kahului", state: "HI", lat: 20.889, lng: -156.469 },
+        { name: "Spanish Fork Utah Temple", city: "Spanish Fork", state: "UT", lat: 40.115, lng: -111.654 },
+        { name: "Flagstaff Arizona Temple", city: "Flagstaff", state: "AZ", lat: 35.198, lng: -111.651 },
+        { name: "Roanoke Virginia Temple", city: "Roanoke", state: "VA", lat: 37.271, lng: -79.941 },
+        { name: "Caldwell Idaho Temple", city: "Caldwell", state: "ID", lat: 43.662, lng: -116.687 },
+        { name: "Tulsa Oklahoma Temple", city: "Tulsa", state: "OK", lat: 36.154, lng: -95.992 },
+        { name: "Colorado Springs Colorado Temple", city: "Colorado Springs", state: "CO", lat: 38.833, lng: -104.821 },
+        { name: "Star Valley Wyoming Temple", city: "Afton", state: "WY", lat: 42.730, lng: -110.933 },
+        { name: "Heber Valley Utah Temple", city: "Heber City", state: "UT", lat: 40.506, lng: -111.413 },
+        { name: "Teton River Idaho Temple", city: "Idaho Falls", state: "ID", lat: 43.491, lng: -112.033 },
+        { name: "Cody Wyoming Temple", city: "Cody", state: "WY", lat: 44.526, lng: -109.057 },
+        { name: "Layton Utah Temple", city: "Layton", state: "UT", lat: 41.074, lng: -111.971 },
+        { name: "Syracuse Utah Temple", city: "Syracuse", state: "UT", lat: 41.089, lng: -112.061 },
+        { name: "Smithfield Utah Temple", city: "Smithfield", state: "UT", lat: 41.838, lng: -111.833 },
+        { name: "Ephraim Utah Temple", city: "Ephraim", state: "UT", lat: 39.359, lng: -111.586 },
+        { name: "Burley Idaho Temple", city: "Burley", state: "ID", lat: 42.535, lng: -113.792 },
+        { name: "Grand Junction Colorado Temple", city: "Grand Junction", state: "CO", lat: 39.063, lng: -108.550 },
+        { name: "Casper Wyoming Temple", city: "Casper", state: "WY", lat: 42.850, lng: -106.325 },
+        { name: "Helena Montana Temple", city: "Helena", state: "MT", lat: 46.589, lng: -112.039 },
+        { name: "Sacramento California Temple", city: "Rancho Cordova", state: "CA", lat: 38.585, lng: -121.316 },
+        { name: "Redlands California Temple", city: "Redlands", state: "CA", lat: 34.050, lng: -117.170 },
+        { name: "Newport Beach California Temple", city: "Newport Beach", state: "CA", lat: 33.618, lng: -117.928 },
+        { name: "Price Utah Temple", city: "Price", state: "UT", lat: 39.600, lng: -110.810 },
+        { name: "Payson Utah Temple", city: "Payson", state: "UT", lat: 40.038, lng: -111.732 },
+        { name: "San Antonio Texas Temple", city: "San Antonio", state: "TX", lat: 29.424, lng: -98.494 },
+        { name: "Lindon Utah Temple", city: "Lindon", state: "UT", lat: 40.344, lng: -111.720 },
+        { name: "Reno Nevada Temple", city: "Reno", state: "NV", lat: 39.529, lng: -119.814 },
+        { name: "Elko Nevada Temple", city: "Elko", state: "NV", lat: 40.833, lng: -115.763 },
+        { name: "Willamette Valley Oregon Temple", city: "Springfield", state: "OR", lat: 44.046, lng: -123.022 },
+        { name: "Farmington New Mexico Temple", city: "Farmington", state: "NM", lat: 36.729, lng: -108.218 },
+        { name: "Summit New Jersey Temple", city: "Summit", state: "NJ", lat: 40.715, lng: -74.364 },
+        { name: "Milwaukee Wisconsin Temple", city: "Milwaukee", state: "WI", lat: 43.038, lng: -87.906 },
+        { name: "Huntsville Alabama Temple", city: "Huntsville", state: "AL", lat: 34.730, lng: -86.586 },
+        { name: "El Paso Texas Temple", city: "El Paso", state: "TX", lat: 31.761, lng: -106.486 },
+        { name: "Coeur d'Alene Idaho Temple", city: "Coeur d'Alene", state: "ID", lat: 47.677, lng: -116.780 },
+        { name: "Queen Creek Arizona Temple", city: "Queen Creek", state: "AZ", lat: 33.248, lng: -111.632 },
+        { name: "Fort Collins Colorado Temple", city: "Fort Collins", state: "CO", lat: 40.585, lng: -105.084 },
+        { name: "Meridian Idaho Temple", city: "Meridian", state: "ID", lat: 43.612, lng: -116.397 },
+        { name: "Brigham City Utah Temple", city: "Brigham City", state: "UT", lat: 41.509, lng: -112.015 },
+        { name: "Fort Lauderdale Florida Temple", city: "Davie", state: "FL", lat: 26.076, lng: -80.288 },
+        { name: "Palmyra New York Temple", city: "Palmyra", state: "NY", lat: 43.063, lng: -77.232 },
+        { name: "Modesto California Temple", city: "Modesto", state: "CA", lat: 37.639, lng: -120.996 },
+        { name: "Montpelier Idaho Temple", city: "Montpelier", state: "ID", lat: 42.322, lng: -111.296 },
+        { name: "Pocatello Idaho Temple", city: "Pocatello", state: "ID", lat: 42.872, lng: -112.445 },
+        { name: "Red Cliffs Utah Temple", city: "St. George", state: "UT", lat: 37.096, lng: -113.568 },
+        { name: "Yorba Linda California Temple", city: "Yorba Linda", state: "CA", lat: 33.889, lng: -117.813 },
+        { name: "Feather River California Temple", city: "Yuba City", state: "CA", lat: 39.141, lng: -121.617 },
+        { name: "Grand Rapids Michigan Temple", city: "Grand Rapids", state: "MI", lat: 42.963, lng: -85.668 },
+        { name: "Jacksonville Florida Temple", city: "Jacksonville", state: "FL", lat: 30.332, lng: -81.655 },
+        { name: "Louisville Kentucky Temple", city: "Crestwood", state: "KY", lat: 38.301, lng: -85.454 },
+        { name: "Medford Oregon Temple", city: "Central Point", state: "OR", lat: 42.375, lng: -122.916 },
+        { name: "Fresno California Temple", city: "Fresno", state: "CA", lat: 36.737, lng: -119.787 },
+        { name: "Rexburg Idaho Temple", city: "Rexburg", state: "ID", lat: 43.826, lng: -111.789 },
+        { name: "Orem Utah Temple", city: "Orem", state: "UT", lat: 40.297, lng: -111.694 },
+        { name: "Lubbock Texas Temple", city: "Lubbock", state: "TX", lat: 33.578, lng: -101.855 },
+        { name: "Taylorsville Utah Temple", city: "Taylorsville", state: "UT", lat: 40.668, lng: -111.938 },
+        { name: "McAllen Texas Temple", city: "McAllen", state: "TX", lat: 26.204, lng: -98.230 },
+        { name: "Bentonville Arkansas Temple", city: "Bentonville", state: "AR", lat: 36.372, lng: -94.209 },
+        { name: "Monticello Utah Temple", city: "Monticello", state: "UT", lat: 37.872, lng: -109.342 },
+        { name: "Oklahoma City Oklahoma Temple", city: "Yukon", state: "OK", lat: 35.471, lng: -97.727 },
+        { name: "Tacoma Washington Temple", city: "Tacoma", state: "WA", lat: 47.252, lng: -122.444 },
+        { name: "Lone Mountain Nevada Temple", city: "Las Vegas", state: "NV", lat: 36.169, lng: -115.139 },
+        { name: "Fairview Texas Temple", city: "Fairview", state: "TX", lat: 33.150, lng: -96.632 },
+        { name: "Marysville Washington Temple", city: "Marysville", state: "WA", lat: 48.051, lng: -122.177 },
+        { name: "Fort Worth Texas Temple", city: "Fort Worth", state: "TX", lat: 32.755, lng: -97.330 }
+      ];
+
+      const templeStatusByName = new Map([
+        ["Orlando Florida Temple", "Renovation"],
+        ["Provo Utah Rock Canyon Temple", "Renovation"],
+        ["Salt Lake Temple", "Renovation"],
+        ["San Diego California Temple", "Opening Soon"],
+        ["Manhattan New York Temple", "Renovation"],
+        ["Kona Hawaii Temple", "Renovation"],
+        ["Harrisburg Pennsylvania Temple", "Announced"],
+        ["Charlotte North Carolina Temple", "Announced"],
+        ["Winchester Virginia Temple", "Construction"],
+        ["Springfield Missouri Temple", "Announced"],
+        ["Bakersfield California Temple", "Announced"],
+        ["Sunnyvale California Temple", "Announced"],
+        ["Portland Maine Temple", "Announced"],
+        ["West Jordan Utah Temple", "Announced"],
+        ["Lehi Utah Temple", "Announced"],
+        ["Cincinnati Ohio Temple", "Announced"],
+        ["Des Moines Iowa Temple", "Announced"],
+        ["Fort Bend Texas Temple", "Announced"],
+        ["Yuma Arizona Temple", "Announced"],
+        ["Honolulu Hawaii Temple", "Announced"],
+        ["Missoula Montana Temple", "Announced"],
+        ["Austin Texas Temple", "Construction"],
+        ["Wichita Kansas Temple", "Construction"],
+        ["Cleveland Ohio Temple", "Construction"],
+        ["Knoxville Tennessee Temple", "Construction"],
+        ["Tampa Florida Temple", "Construction"],
+        ["Marysville Washington Temple", "Announced"],
+        ["Norfolk Virginia Temple", "Announced"],
+        ["Greenville South Carolina Temple", "Announced"],
+        ["Rapid City South Dakota Temple", "Announced"],
+        ["Vancouver Washington Temple", "Construction"],
+        ["Fairbanks Alaska Temple", "Construction"],
+        ["Kahului Hawaii Temple", "Announced"],
+        ["Spanish Fork Utah Temple", "Announced"],
+        ["Flagstaff Arizona Temple", "Announced"],
+        ["Roanoke Virginia Temple", "Announced"],
+        ["Caldwell Idaho Temple", "Announced"],
+        ["Tulsa Oklahoma Temple", "Announced"],
+        ["Colorado Springs Colorado Temple", "Announced"],
+        ["Heber Valley Utah Temple", "Construction"],
+        ["Teton River Idaho Temple", "Construction"],
+        ["Cody Wyoming Temple", "Construction"],
+        ["Smithfield Utah Temple", "Construction"],
+        ["Ephraim Utah Temple", "Opening Soon"],
+        ["Fort Worth Texas Temple", "Construction"],
+        ["Price Utah Temple", "Announced"],
+        ["Summit New Jersey Temple", "Announced"],
+        ["Milwaukee Wisconsin Temple", "Announced"],
+        ["Huntsville Alabama Temple", "Announced"],
+        ["El Paso Texas Temple", "Announced"],
+        ["Coeur d'Alene Idaho Temple", "Announced"],
+        ["Queen Creek Arizona Temple", "Announced"],
+        ["Modesto California Temple", "Construction"],
+        ["Montpelier Idaho Temple", "Construction"],
+        ["Grand Rapids Michigan Temple", "Construction"],
+        ["Jacksonville Florida Temple", "Construction"],
+        ["Tacoma Washington Temple", "Announced"],
+        ["Lone Mountain Nevada Temple", "Construction"],
+        ["Fairview Texas Temple", "Construction"],
+        ["Yorba Linda California Temple", "Opening Soon"],
+        ["Willamette Valley Oregon Temple", "Opening Soon"],
+        ["Lindon Utah Temple", "Opening Soon"]
+      ]);
+
+      const lower48Bounds = L.latLngBounds(
+        L.latLng(24.0, -125.0),
+        L.latLng(50.0, -66.0)
+      );
+      const expandedUsBounds = L.latLngBounds(
+        L.latLng(17.0, -180.0),
+        L.latLng(72.0, -64.0)
+      );
+      const map = L.map("map", {
+        zoomControl: true,
+        maxBounds: lower48Bounds,
+        maxBoundsViscosity: 0.9,
+        minZoom: 3
+      }).setView([39.5, -98.35], 4);
+      let expandedMapScope = false;
+      const popupOptions = {
+        maxWidth: 300,
+        autoPan: true,
+        keepInView: true,
+        closeButton: true,
+        autoPanPadding: L.point(48, 48)
+      };
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 18,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(map);
+
+      const mapScopeControl = L.control({ position: "topright" });
+      mapScopeControl.onAdd = () => {
+        const container = L.DomUtil.create("div", "map-scope-control");
+        const button = L.DomUtil.create("button", "", container);
+        const zoomOutButton = L.DomUtil.create("button", "secondary-map-button", container);
+        zoomOutButton.textContent = "Zoom out";
+        const syncButton = () => {
+          button.textContent = expandedMapScope ? "Focus lower 48" : "Show AK / HI / Samoa";
+        };
+        syncButton();
+        L.DomEvent.disableClickPropagation(container);
+        L.DomEvent.on(button, "click", () => {
+          expandedMapScope = !expandedMapScope;
+          const bounds = expandedMapScope ? expandedUsBounds : lower48Bounds;
+          map.setMaxBounds(bounds);
+          if (expandedMapScope) map.fitBounds(bounds, { padding: [18, 18] });
+          else map.setView([39.5, -98.35], 4);
+          syncButton();
+        });
+        L.DomEvent.on(zoomOutButton, "click", () => {
+          expandedMapScope = false;
+          map.setMaxBounds(lower48Bounds);
+          map.setView([39.5, -98.35], 4);
+          syncButton();
+        });
+        return container;
+      };
+      mapScopeControl.addTo(map);
+
+      const layer = L.layerGroup().addTo(map);
+      const parkLayer = L.layerGroup().addTo(map);
+      const npsLayer = L.layerGroup().addTo(map);
+      const ttLayer = L.layerGroup().addTo(map);
+      const templeLayer = L.layerGroup().addTo(map);
+      const markersByName = new Map();
+      const search = document.getElementById("search");
+      const filters = document.getElementById("stateFilters");
+      const openFilterModal = document.getElementById("openFilterModal");
+      const filterOverlay = document.getElementById("filterOverlay");
+      const clearFilters = document.getElementById("clearFilters");
+      const applyFilters = document.getElementById("applyFilters");
+      const mapQuote = document.getElementById("mapQuote");
+      const closeMapQuote = document.getElementById("closeMapQuote");
+      const parksProgress = document.getElementById("parksProgress");
+      const npsProgress = document.getElementById("npsProgress");
+      const ttProgress = document.getElementById("ttProgress");
+      const templeProgress = document.getElementById("templeProgress");
+      const toggleNpsMap = document.getElementById("toggleNpsMap");
+      const toggleParksMap = document.getElementById("toggleParksMap");
+      const toggleTtMap = document.getElementById("toggleTtMap");
+      const toggleTemplesMap = document.getElementById("toggleTemplesMap");
+      const toggleAllCategoriesButtons = [...document.querySelectorAll("[data-toggle-all-categories]")];
+      const categoryTabButtons = [...document.querySelectorAll("[data-category-tab]")];
+      const categoryPanels = [...document.querySelectorAll("[data-category-panel]")];
+      let activeCategory = "parks";
+
+      function saveVisited() {
+        localStorage.setItem(storageKey, JSON.stringify([...visited]));
+      }
+
+      function saveVisitedSites() {
+        localStorage.setItem(npsStorageKey, JSON.stringify([...visitedSites]));
+      }
+
+      function saveTtVisited() {
+        localStorage.setItem(ttVisitedKey, JSON.stringify([...ttVisited]));
+      }
+
+      function saveTtNotes() {
+        localStorage.setItem(ttNotesKey, JSON.stringify(ttNotes));
+      }
+
+      function saveTempleComplete() {
+        localStorage.setItem(templeCompleteKey, JSON.stringify([...templeComplete]));
+      }
+
+      function getUnitType(unit) {
+        const designation = (unit.designation || "").toLowerCase();
+        const fullName = (unit.fullName || "").toLowerCase();
+        return designation === "national park" || fullName.includes("national park") ? "park" : "site";
+      }
+
+      function getCoordinates(unit) {
+        const latLong = unit.latLong || "";
+        const match = latLong.match(/lat:\s*([-0-9.]+),\s*long:\s*([-0-9.]+)/i);
+        if (!match) return null;
+        const lat = Number(match[1]);
+        const lng = Number(match[2]);
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+        return { lat, lng };
+      }
+
+      function normalizeUnit(unit) {
+        const coords = getCoordinates(unit);
+        if (!coords) return null;
+        const states = String(unit.states || "")
+          .split(",")
+          .map((state) => state.trim().toUpperCase())
+          .filter(Boolean);
+        return {
+          name: unit.fullName || unit.name || "",
+          parkCode: unit.parkCode || "",
+          states,
+          lat: coords.lat,
+          lng: coords.lng,
+          type: getUnitType(unit)
+        };
+      }
+
+      function ttColor(location) {
+        if (ttVisited.has(location.name)) return "#7c8792";
+        if (ttNotes[location.name]) return "#2aa7a1";
+        return location.brand === "tt" ? "#1f5c2a" : "#8fd18a";
+      }
+
+      function templeColor(temple) {
+        if (templeComplete.has(temple.name)) return "#7c8792";
+        const status = templeStatusByName.get(temple.name);
+        return status === "Announced" || status === "Construction" ? "#f4d46f" : "#d4a62a";
+      }
+
+      function npsColor(site) {
+        return visitedSites.has(site.name) ? "#7c8792" : "#2e6fbb";
+      }
+
+      const allStates = [...new Set(
+        [
+          "AK","AL","AR","AZ","CA","CO","CT","DC","DE","FL","GA","HI","IA","ID","IL","IN","KS","KY","LA","MA","MD","ME","MI","MN","MO","MS","MT","NC","ND","NE","NH","NJ","NM","NV","NY","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VA","VI","VT","WA","WI","WV","WY"
+        ]
+      )]
+        .filter(Boolean)
+        .sort((a, b) => (stateNames[a] || a).localeCompare(stateNames[b] || b));
+
+      function matchesFilters(park) {
+        const term = searchTerm.trim().toLowerCase();
+        const matchesSearch =
+          !term ||
+          park.name.toLowerCase().includes(term) ||
+          park.states.some((state) => (stateNames[state] || state).toLowerCase().includes(term));
+        const matchesState = stateFilter.size === 0 || park.states.some((state) => stateFilter.has(state));
+        return matchesSearch && matchesState;
+      }
+
+      function matchesStateChip(state) {
+        return stateFilter.size === 0 || stateFilter.has(state);
+      }
+
+      function matchesTtFilters(location) {
+        const term = searchTerm.trim().toLowerCase();
+        const matchesSearch =
+          !term ||
+          location.name.toLowerCase().includes(term) ||
+          location.city.toLowerCase().includes(term) ||
+          (stateNames[location.state] || location.state).toLowerCase().includes(term);
+        return matchesSearch && matchesStateChip(location.state);
+      }
+
+      function matchesTempleFilters(temple) {
+        const term = searchTerm.trim().toLowerCase();
+        const matchesSearch =
+          !term ||
+          temple.name.toLowerCase().includes(term) ||
+          temple.city.toLowerCase().includes(term) ||
+          (stateNames[temple.state] || temple.state).toLowerCase().includes(term);
+        return matchesSearch && matchesStateChip(temple.state);
+      }
+
+      function createMarker(park) {
+        const color = visited.has(park.name) ? "#7c8792" : "#c74a39";
+        return L.circleMarker([park.lat, park.lng], {
+          radius: 8,
+          color,
+          weight: 2,
+          fillColor: color,
+          fillOpacity: visited.has(park.name) ? 0.75 : 0.85
+        }).bindPopup(popupMarkup(park), popupOptions);
+      }
+
+      function popupMarkup(park) {
+        const isVisited = park.type === "park" ? visited.has(park.name) : visitedSites.has(park.name);
+        return `
+          <div class="popup">
+            <strong>${park.name}</strong>
+            <div class="muted">${park.states.map((s) => stateNames[s] || s).join(", ")}</div>
+            <div class="muted">${park.type === "park" ? "Official national park" : "Other NPS site"}</div>
+            <button data-park="${park.name}" data-type="${park.type}">${isVisited ? "Uncheck visited" : "Mark visited"}</button>
+          </div>
+        `;
+      }
+
+      function ttPopupMarkup(location) {
+        const note = ttNotes[location.name] || "";
+        const visited = ttVisited.has(location.name);
+        return `
+          <div class="popup">
+            <strong>${location.name}</strong>
+            <div class="muted">${location.city}, ${location.state}</div>
+            <div class="muted">${location.brand === "tt" ? "Thousand Trails" : "Encore"}</div>
+            <button data-tt-visited="${location.name}">${visited ? "Uncheck visited" : "I've been here"}</button>
+            <textarea data-tt-note="${location.name}" placeholder="Add notes here...">${note}</textarea>
+            <button data-tt-save-note="${location.name}">Save note</button>
+          </div>
+        `;
+      }
+
+      function templePopupMarkup(temple) {
+        const complete = templeComplete.has(temple.name);
+        const status = templeStatusByName.get(temple.name) || "Dedicated";
+        return `
+          <div class="popup">
+            <strong>${temple.name}</strong>
+            <div class="muted">${temple.city}, ${temple.state}</div>
+            <div class="muted">LDS temple · ${status}</div>
+            <button data-temple-complete="${temple.name}">${complete ? "Undo complete" : "Mark complete"}</button>
+          </div>
+        `;
+      }
+
+      function makePopupDraggable(popup) {
+        const popupEl = popup.getElement();
+        const wrapper = popupEl?.querySelector(".leaflet-popup-content-wrapper");
+        if (!popupEl || !wrapper || wrapper.dataset.draggable === "true") return;
+        wrapper.dataset.draggable = "true";
+
+        wrapper.addEventListener("pointerdown", (event) => {
+          if (event.target.closest("button, textarea, input, select, a, .leaflet-popup-close-button")) return;
+
+          event.preventDefault();
+          wrapper.classList.add("dragging");
+          map.dragging.disable();
+
+          const startX = event.clientX;
+          const startY = event.clientY;
+          const startMarginLeft = parseFloat(popupEl.style.marginLeft || "0");
+          const startMarginTop = parseFloat(popupEl.style.marginTop || "0");
+
+          const movePopup = (moveEvent) => {
+            popupEl.style.marginLeft = `${startMarginLeft + moveEvent.clientX - startX}px`;
+            popupEl.style.marginTop = `${startMarginTop + moveEvent.clientY - startY}px`;
+          };
+
+          const stopDragging = () => {
+            wrapper.classList.remove("dragging");
+            map.dragging.enable();
+            document.removeEventListener("pointermove", movePopup);
+            document.removeEventListener("pointerup", stopDragging);
+            document.removeEventListener("pointercancel", stopDragging);
+          };
+
+          document.addEventListener("pointermove", movePopup);
+          document.addEventListener("pointerup", stopDragging);
+          document.addEventListener("pointercancel", stopDragging);
+        });
+      }
+
+      function renderFilters() {
+        filters.innerHTML = "";
+        const allBtn = document.createElement("button");
+        allBtn.className = "chip" + (stateFilter.size === 0 ? " active" : "");
+        allBtn.textContent = "All states";
+        allBtn.onclick = () => {
+          stateFilter.clear();
+          render();
+        };
+        filters.appendChild(allBtn);
+
+        allStates.forEach((state) => {
+          const btn = document.createElement("button");
+          btn.className = "chip" + (stateFilter.has(state) ? " active" : "");
+          btn.textContent = state;
+          btn.title = stateNames[state] || state;
+          btn.onclick = () => {
+            if (stateFilter.has(state)) stateFilter.delete(state);
+            else stateFilter.add(state);
+            render();
+          };
+          filters.appendChild(btn);
+        });
+      }
+
+      function countFilteredParks() {
+        return parks.filter(matchesFilters).length;
+      }
+
+      function countFilteredNpsSites() {
+        return allUnits.filter((park) => park.type === "site" && matchesFilters(park)).length;
+      }
+
+      function countFilteredTt() {
+        return ttLocations.filter(matchesTtFilters).length;
+      }
+
+      function countFilteredTemples() {
+        return templeLocations.filter(matchesTempleFilters).length;
+      }
+
+      function toggleVisited(parkName) {
+        const unit = allUnits.find((item) => item.name === parkName);
+        if (!unit) return;
+        if (unit.type === "park") {
+          if (visited.has(parkName)) visited.delete(parkName);
+          else visited.add(parkName);
+          saveVisited();
+        } else {
+          if (visitedSites.has(parkName)) visitedSites.delete(parkName);
+          else visitedSites.add(parkName);
+          saveVisitedSites();
+        }
+        render();
+      }
+
+      function progressMarkup(done, total, doneLabel) {
+        return `
+          <div class="metric">
+            <strong>${done}</strong>
+            ${doneLabel}
+          </div>
+          <div class="metric">
+            <strong>${Math.max(total - done, 0)}</strong>
+            remaining
+          </div>
+        `;
+      }
+
+      function renderSummary() {
+        const filteredParks = parks.filter(matchesFilters);
+        const filteredSites = allUnits.filter((park) => park.type === "site" && matchesFilters(park));
+        const filteredTt = ttLocations.filter(matchesTtFilters);
+        const filteredTemples = templeLocations.filter(matchesTempleFilters);
+        parksProgress.innerHTML = progressMarkup(filteredParks.filter((park) => visited.has(park.name)).length, filteredParks.length, "visited");
+        npsProgress.innerHTML = progressMarkup(filteredSites.filter((site) => visitedSites.has(site.name)).length, filteredSites.length, "visited");
+        ttProgress.innerHTML = progressMarkup(filteredTt.filter((location) => ttVisited.has(location.name)).length, filteredTt.length, "visited");
+        templeProgress.innerHTML = progressMarkup(filteredTemples.filter((temple) => templeComplete.has(temple.name)).length, filteredTemples.length, "complete");
+      }
+
+      function renderCategoryTabs() {
+        categoryTabButtons.forEach((button) => {
+          const isActive = button.dataset.categoryTab === activeCategory;
+          button.classList.toggle("active", isActive);
+        });
+        categoryPanels.forEach((panel) => {
+          const isActive = panel.dataset.categoryPanel === activeCategory;
+          panel.classList.toggle("active", isActive);
+        });
+      }
+
+      function allCategoriesAreOn() {
+        return showParksOnMap && showNpsOnMap && showTtOnMap && showTemplesOnMap;
+      }
+
+      function setAllCategoriesOnMap(visible) {
+        showParksOnMap = visible;
+        showNpsOnMap = visible;
+        showTtOnMap = visible;
+        showTemplesOnMap = visible;
+      }
+
+      function renderMarkers(filtered) {
+        parkLayer.clearLayers();
+        filtered.forEach((park) => {
+          const marker = createMarker(park).addTo(parkLayer);
+          markersByName.set(park.name, marker);
+          marker.on("popupopen", (event) => {
+            makePopupDraggable(event.popup);
+            const button = event.popup.getElement()?.querySelector(`[data-park="${CSS.escape(park.name)}"]`);
+            if (button) button.onclick = () => toggleVisited(park.name);
+          });
+        });
+      }
+
+      function renderNpsMarkers(filtered) {
+        npsLayer.clearLayers();
+        if (!showNpsOnMap) return;
+        filtered.forEach((park) => {
+          const color = npsColor(park);
+          const marker = L.circleMarker([park.lat, park.lng], {
+            radius: 7,
+            color,
+            weight: 2,
+            fillColor: color,
+            fillOpacity: visitedSites.has(park.name) ? 0.75 : 0.85
+          }).addTo(npsLayer);
+          markersByName.set(park.name, marker);
+          marker.bindPopup(popupMarkup(park), popupOptions);
+          marker.on("popupopen", (event) => {
+            makePopupDraggable(event.popup);
+            const button = event.popup.getElement()?.querySelector(`[data-park="${CSS.escape(park.name)}"]`);
+            if (button) button.onclick = () => toggleVisited(park.name);
+          });
+        });
+      }
+
+      function renderTtMarkers() {
+        ttLayer.clearLayers();
+        if (!showTtOnMap) return;
+        ttLocations.filter(matchesTtFilters).forEach((location) => {
+          const color = ttColor(location);
+          const marker = L.circleMarker([location.lat, location.lng], {
+            radius: 8,
+            color,
+            weight: 2,
+            fillColor: color,
+            fillOpacity: 0.9
+          }).addTo(ttLayer);
+          markersByName.set(location.name, marker);
+          marker.bindPopup(ttPopupMarkup(location), popupOptions);
+          marker.on("popupopen", (event) => {
+            makePopupDraggable(event.popup);
+            const popup = event.popup.getElement();
+            if (!popup) return;
+            const visitedButton = popup.querySelector(`[data-tt-visited="${CSS.escape(location.name)}"]`);
+            const saveButton = popup.querySelector(`[data-tt-save-note="${CSS.escape(location.name)}"]`);
+            if (visitedButton) {
+              visitedButton.onclick = () => {
+                if (ttVisited.has(location.name)) ttVisited.delete(location.name);
+                else ttVisited.add(location.name);
+                saveTtVisited();
+                render();
+                const markerAgain = markersByName.get(location.name);
+                if (markerAgain) markerAgain.openPopup();
+              };
+            }
+            if (saveButton) {
+              saveButton.onclick = () => {
+                const field = popup.querySelector(`[data-tt-note="${CSS.escape(location.name)}"]`);
+                ttNotes[location.name] = field.value;
+                saveTtNotes();
+                render();
+                const markerAgain = markersByName.get(location.name);
+                if (markerAgain) markerAgain.openPopup();
+              };
+            }
+          });
+        });
+      }
+
+      function renderTempleMarkers() {
+        templeLayer.clearLayers();
+        if (!showTemplesOnMap) return;
+        templeLocations.filter(matchesTempleFilters).forEach((temple) => {
+          const color = templeColor(temple);
+          const marker = L.circleMarker([temple.lat, temple.lng], {
+            radius: 8,
+            color,
+            weight: 2,
+            fillColor: color,
+            fillOpacity: 0.9
+          }).addTo(templeLayer);
+          markersByName.set(temple.name, marker);
+          marker.bindPopup(templePopupMarkup(temple), popupOptions);
+          marker.on("popupopen", (event) => {
+            makePopupDraggable(event.popup);
+            const popup = event.popup.getElement();
+            if (!popup) return;
+            const completeButton = popup.querySelector(`[data-temple-complete="${CSS.escape(temple.name)}"]`);
+            if (completeButton) {
+              completeButton.onclick = () => {
+                if (templeComplete.has(temple.name)) templeComplete.delete(temple.name);
+                else templeComplete.add(temple.name);
+                saveTempleComplete();
+                render();
+                const markerAgain = markersByName.get(temple.name);
+                if (markerAgain) markerAgain.openPopup();
+              };
+            }
+          });
+        });
+      }
+
+      function render() {
+        renderFilters();
+        const filteredParks = parks.filter(matchesFilters);
+        const filteredSites = allUnits.filter((park) => park.type === "site" && matchesFilters(park));
+        renderMarkers(showParksOnMap ? filteredParks : []);
+        renderNpsMarkers(filteredSites);
+        renderTtMarkers();
+        renderTempleMarkers();
+        renderCategoryTabs();
+        toggleParksMap.textContent = showParksOnMap ? "Off map" : "On map";
+        toggleParksMap.classList.toggle("active", showParksOnMap);
+        toggleNpsMap.textContent = showNpsOnMap ? "Off map" : "On map";
+        toggleNpsMap.classList.toggle("active", showNpsOnMap);
+        toggleTtMap.textContent = showTtOnMap ? "Off map" : "On map";
+        toggleTtMap.classList.toggle("active", showTtOnMap);
+        toggleTemplesMap.textContent = showTemplesOnMap ? "Off map" : "On map";
+        toggleTemplesMap.classList.toggle("active", showTemplesOnMap);
+        toggleAllCategoriesButtons.forEach((button) => {
+          button.textContent = allCategoriesAreOn() ? "All off" : "All on";
+          button.classList.toggle("active", allCategoriesAreOn());
+        });
+        renderSummary();
+      }
+
+      search.addEventListener("input", (event) => {
+        searchTerm = event.target.value;
+        render();
+      });
+
+      openFilterModal.addEventListener("click", () => {
+        filterOverlay.classList.add("open");
+        filterOverlay.setAttribute("aria-hidden", "false");
+        search.focus();
+      });
+
+      function closeFilters() {
+        filterOverlay.classList.remove("open");
+        filterOverlay.setAttribute("aria-hidden", "true");
+      }
+
+      applyFilters.addEventListener("click", closeFilters);
+
+      filterOverlay.addEventListener("click", (event) => {
+        if (event.target === filterOverlay) closeFilters();
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && filterOverlay.classList.contains("open")) closeFilters();
+      });
+
+      clearFilters.addEventListener("click", () => {
+        searchTerm = "";
+        search.value = "";
+        stateFilter.clear();
+        render();
+      });
+
+      closeMapQuote.addEventListener("click", () => {
+        mapQuote.classList.add("hidden");
+      });
+
+      toggleParksMap.addEventListener("click", () => {
+        showParksOnMap = !showParksOnMap;
+        render();
+      });
+
+      toggleNpsMap.addEventListener("click", () => {
+        showNpsOnMap = !showNpsOnMap;
+        render();
+      });
+
+      toggleTtMap.addEventListener("click", () => {
+        showTtOnMap = !showTtOnMap;
+        render();
+      });
+
+      toggleTemplesMap.addEventListener("click", () => {
+        showTemplesOnMap = !showTemplesOnMap;
+        render();
+      });
+
+      toggleAllCategoriesButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          setAllCategoriesOnMap(!allCategoriesAreOn());
+          render();
+        });
+      });
+
+      categoryTabButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          activeCategory = button.dataset.categoryTab;
+          render();
+        });
+      });
+
+      document.body.addEventListener("click", (event) => {
+        const toggle = event.target.closest("[data-toggle]");
+        const focus = event.target.closest("[data-focus]");
+        if (toggle) toggleVisited(toggle.dataset.toggle);
+        if (focus) {
+          const park = allUnits.find((item) => item.name === focus.dataset.focus);
+          const marker = markersByName.get(park?.name);
+          if (marker) {
+            map.setView([park.lat, park.lng], Math.max(map.getZoom(), 6), { animate: true });
+            marker.openPopup();
+          }
+        }
+      });
+
+      async function loadNpsData(apiKey) {
+        const url = "https://developer.nps.gov/api/v1/parks?limit=500&fields=parkCode,fullName,designation,states,latLong";
+        const response = await fetch(url, {
+          headers: {
+            "X-Api-Key": apiKey
+          }
+        });
+        if (!response.ok) {
+          throw new Error(`NPS API request failed: ${response.status}`);
+        }
+        const data = await response.json();
+        const units = (data.data || []).map(normalizeUnit).filter(Boolean);
+        const sites = units.filter((unit) => unit.type === "site");
+        allUnits = parks.concat(sites);
+        render();
+      }
+
+      async function loadApiKeyFromEnv() {
+        try {
+          const response = await fetch("./.env", { cache: "no-store" });
+          if (!response.ok) {
+            throw new Error(`Could not load .env: ${response.status}`);
+          }
+          const envText = await response.text();
+          const match = envText.match(/^NPS_API_KEY=(.+)$/m);
+          if (match && match[1].trim()) return match[1].trim();
+        } catch (error) {
+          console.warn(error);
+        }
+        return bundledNpsApiKey;
+      }
+
+      async function init() {
+        try {
+          const apiKey = await loadApiKeyFromEnv();
+          loadNpsData(apiKey).catch((error) => console.error(error));
+        } catch (error) {
+          console.error(error);
+        }
+        render();
+      }
+
+      render();
+      init();
+    </script>
+  </body>
+</html>

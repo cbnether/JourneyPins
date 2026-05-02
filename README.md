@@ -24,3 +24,4 @@ If you want, I can next turn this into a fuller app with:
 - a cleaner mobile experience
 - import/export of your visited parks
 # JourneyPins
+# JourneyPins

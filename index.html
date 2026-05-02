@@ -1341,6 +1341,7 @@
       const filterOverlay = document.getElementById("filterOverlay");
       const clearFilters = document.getElementById("clearFilters");
       const applyFilters = document.getElementById("applyFilters");
+      const visitedOnlyFilter = document.getElementById("visitedOnlyFilter");
       const mapQuote = document.getElementById("mapQuote");
       const closeMapQuote = document.getElementById("closeMapQuote");
       const parksProgress = document.getElementById("parksProgress");
@@ -1355,6 +1356,7 @@
       const categoryTabButtons = [...document.querySelectorAll("[data-category-tab]")];
       const categoryPanels = [...document.querySelectorAll("[data-category-panel]")];
       let activeCategory = "parks";
+      let showVisitedOnly = false;
 
       function saveVisited() {
         localStorage.setItem(storageKey, JSON.stringify([...visited]));
@@ -1440,7 +1442,10 @@
           park.name.toLowerCase().includes(term) ||
           park.states.some((state) => (stateNames[state] || state).toLowerCase().includes(term));
         const matchesState = stateFilter.size === 0 || park.states.some((state) => stateFilter.has(state));
-        return matchesSearch && matchesState;
+        const matchesVisited =
+          !showVisitedOnly ||
+          (park.type === "park" ? visited.has(park.name) : visitedSites.has(park.name));
+        return matchesSearch && matchesState && matchesVisited;
       }
 
       function matchesStateChip(state) {
@@ -1454,7 +1459,8 @@
           location.name.toLowerCase().includes(term) ||
           location.city.toLowerCase().includes(term) ||
           (stateNames[location.state] || location.state).toLowerCase().includes(term);
-        return matchesSearch && matchesStateChip(location.state);
+        const matchesVisited = !showVisitedOnly || ttVisited.has(location.name);
+        return matchesSearch && matchesStateChip(location.state) && matchesVisited;
       }
 
       function matchesTempleFilters(temple) {
@@ -1464,7 +1470,8 @@
           temple.name.toLowerCase().includes(term) ||
           temple.city.toLowerCase().includes(term) ||
           (stateNames[temple.state] || temple.state).toLowerCase().includes(term);
-        return matchesSearch && matchesStateChip(temple.state);
+        const matchesVisited = !showVisitedOnly || templeComplete.has(temple.name);
+        return matchesSearch && matchesStateChip(temple.state) && matchesVisited;
       }
 
       function createMarker(park) {
@@ -1790,6 +1797,8 @@
           button.textContent = allCategoriesAreOn() ? "All off" : "All on";
           button.classList.toggle("active", allCategoriesAreOn());
         });
+        visitedOnlyFilter.textContent = showVisitedOnly ? "Showing places I’ve been" : "Show places I’ve been";
+        visitedOnlyFilter.classList.toggle("active", showVisitedOnly);
         renderSummary();
       }
 
@@ -1823,6 +1832,12 @@
         searchTerm = "";
         search.value = "";
         stateFilter.clear();
+        showVisitedOnly = false;
+        render();
+      });
+
+      visitedOnlyFilter.addEventListener("click", () => {
+        showVisitedOnly = !showVisitedOnly;
         render();
       });
 

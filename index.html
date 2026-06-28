@@ -334,14 +334,9 @@
         color: var(--text);
       }
 
-      .button.brand-tt {
+      .button.brand-states {
         background: linear-gradient(135deg, #1c6036, #2f8d57);
         color: white;
-      }
-
-      .button.brand-tt-encore {
-        background: #8fd18a;
-        color: #17301a;
       }
 
       .button.brand-temple {
@@ -382,6 +377,48 @@
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 10px;
+      }
+
+      .share-box {
+        margin-top: 12px;
+        display: grid;
+        gap: 10px;
+      }
+
+      .share-title {
+        color: var(--muted);
+        font-size: 0.82rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .share-actions {
+        display: block;
+      }
+
+      .share-button {
+        width: 100%;
+        border: 1px solid rgba(23, 34, 35, 0.1);
+        border-radius: 999px;
+        padding: 10px 15px;
+        cursor: pointer;
+        background: linear-gradient(135deg, var(--green), var(--blue));
+        color: white;
+        font-family: inherit;
+        font-size: 0.9rem;
+        font-weight: 800;
+      }
+
+      .share-button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 16px rgba(26, 36, 33, 0.1);
+      }
+
+      .share-status {
+        min-height: 1rem;
+        color: var(--muted);
+        font-size: 0.8rem;
       }
 
       .filter-overlay {
@@ -492,7 +529,7 @@
         background: linear-gradient(135deg, var(--blue), #5aa7dd);
       }
 
-      .category-tab-button[data-category-tab="tt"] {
+      .category-tab-button[data-category-tab="states"] {
         background: linear-gradient(135deg, #1f5c2a, var(--green));
       }
 
@@ -509,6 +546,11 @@
         transform: translateY(-2px);
         box-shadow: 0 16px 26px rgba(26, 36, 33, 0.18), inset 0 0 0 2px rgba(255, 255, 255, 0.42);
         filter: saturate(1.08);
+      }
+
+      .category-tab-button:not(.map-visible) {
+        opacity: 0.55;
+        filter: grayscale(0.25);
       }
 
       .category-tab-button:hover {
@@ -722,6 +764,26 @@
         color: white;
       }
 
+      .popup-check {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 10px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        background: rgba(43, 130, 85, 0.12);
+        color: #17301a;
+        font-weight: 800;
+        cursor: pointer;
+      }
+
+      .popup-check input {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--green);
+        cursor: pointer;
+      }
+
       .popup textarea {
         width: 100%;
         min-height: 84px;
@@ -731,6 +793,33 @@
         padding: 8px;
         font-family: inherit;
         resize: vertical;
+      }
+
+      .popup-memory {
+        margin-top: 10px;
+        display: grid;
+        gap: 8px;
+      }
+
+      .popup-memory-count {
+        font-size: 0.78rem;
+        color: var(--muted);
+        text-align: right;
+      }
+
+      .popup-photo-input {
+        width: 100%;
+        font: inherit;
+        font-size: 0.82rem;
+      }
+
+      .popup-photo-preview {
+        display: block;
+        width: 100%;
+        max-height: 150px;
+        object-fit: cover;
+        border-radius: 10px;
+        border: 1px solid var(--line);
       }
 
       .muted {
@@ -774,14 +863,13 @@
           <div class="category-tab-row">
             <button class="category-tab-button active" data-category-tab="parks">National Parks</button>
             <button class="category-tab-button" data-category-tab="nps">NPS Sites</button>
-            <button class="category-tab-button" data-category-tab="tt">Thousand Trails</button>
+            <button class="category-tab-button" data-category-tab="states">50 States</button>
             <button class="category-tab-button" data-category-tab="temples">Temples</button>
           </div>
           <div class="category-tabs">
             <div class="category-panel active" data-category-panel="parks">
               <div class="category-tab">
                 <div class="category-controls">
-                  <button id="toggleParksMap" class="button brand-parks">On map</button>
                   <button class="button brand-all" data-toggle-all-categories>All off</button>
                 </div>
                 <div class="progress-card" id="parksProgress"></div>
@@ -790,25 +878,22 @@
             <div class="category-panel" data-category-panel="nps">
               <div class="category-tab">
                 <div class="category-controls">
-                  <button id="toggleNpsMap" class="button brand-nps">On map</button>
                   <button class="button brand-all" data-toggle-all-categories>All off</button>
                 </div>
                 <div class="progress-card" id="npsProgress"></div>
               </div>
             </div>
-            <div class="category-panel" data-category-panel="tt">
+            <div class="category-panel" data-category-panel="states">
               <div class="category-tab">
                 <div class="category-controls">
-                  <button id="toggleTtMap" class="button brand-tt">On map</button>
                   <button class="button brand-all" data-toggle-all-categories>All off</button>
                 </div>
-                <div class="progress-card" id="ttProgress"></div>
+                <div class="progress-card" id="statesProgress"></div>
               </div>
             </div>
             <div class="category-panel" data-category-panel="temples">
               <div class="category-tab">
                 <div class="category-controls">
-                  <button id="toggleTemplesMap" class="button brand-temple">On map</button>
                   <button class="button brand-all" data-toggle-all-categories>All off</button>
                 </div>
                 <div class="progress-card" id="templeProgress"></div>
@@ -821,6 +906,15 @@
           <div class="filter-actions">
             <button id="openFilterModal" class="button filter-main">Filter</button>
             <button id="clearFilters" class="button secondary">Clear filters</button>
+          </div>
+          <div class="share-actions" style="margin-top:12px;">
+            <button id="visitedOnlyFilter" class="share-button">Show only places I’ve been</button>
+          </div>
+          <div class="share-box">
+            <div class="share-actions">
+              <button id="shareScreenshot" class="share-button">Save screen cap - share with your friends</button>
+            </div>
+            <div id="shareStatus" class="share-status" aria-live="polite">Choose the JourneyPins tab to save the screen exactly as shown.</div>
           </div>
         </div>
       </aside>
@@ -850,9 +944,6 @@
           </div>
         </div>
         <input id="search" class="search" type="search" placeholder="Filter parks, states, or temples" style="margin-top:14px;" />
-        <div class="filter-actions" style="margin-top:12px;">
-          <button id="visitedOnlyFilter" class="button secondary">Show places I’ve been</button>
-        </div>
         <div id="stateFilters" class="filters"></div>
       </div>
     </div>
@@ -939,114 +1030,78 @@
 
       const storageKey = "npb-visited-v1";
       const npsStorageKey = "npb-nps-visited-v1";
-      const ttVisitedKey = "npb-tt-visited-v1";
-      const ttNotesKey = "npb-tt-notes-v1";
+      const statesVisitedKey = "npb-states-visited-v1";
       const templeCompleteKey = "npb-temple-complete-v1";
+      const placeMemoriesKey = "npb-place-memories-v1";
       const bundledNpsApiKey = "NHwal6BG71ikZNdXYqOQ0QR390ap0cTWhHO8XUtI";
       const visited = new Set(JSON.parse(localStorage.getItem(storageKey) || "[]"));
       const visitedSites = new Set(JSON.parse(localStorage.getItem(npsStorageKey) || "[]"));
-      const ttVisited = new Set(JSON.parse(localStorage.getItem(ttVisitedKey) || "[]"));
-      const ttNotes = JSON.parse(localStorage.getItem(ttNotesKey) || "{}");
+      const statesVisited = new Set(JSON.parse(localStorage.getItem(statesVisitedKey) || "[]"));
       const templeComplete = new Set(JSON.parse(localStorage.getItem(templeCompleteKey) || "[]"));
+      const placeMemories = JSON.parse(localStorage.getItem(placeMemoriesKey) || "{}");
       const stateFilter = new Set();
       let searchTerm = "";
       let allUnits = parks.slice();
       let loadError = "";
       let showParksOnMap = true;
       let showNpsOnMap = false;
-      let showTtOnMap = false;
+      let showStatesOnMap = false;
       let showTemplesOnMap = false;
-      const ttLocations = [
-        { name: "Moody Beach", brand: "tt", city: "Wells", state: "ME", lat: 43.309, lng: -70.574 },
-        { name: "Gateway to Cape Cod", brand: "tt", city: "Rochester", state: "MA", lat: 41.738, lng: -70.780 },
-        { name: "Sturbridge", brand: "tt", city: "Sturbridge", state: "MA", lat: 42.103, lng: -72.083 },
-        { name: "Sea Pines", brand: "tt", city: "Swainton", state: "NJ", lat: 39.165, lng: -74.907 },
-        { name: "Lake & Shore", brand: "tt", city: "Ocean View", state: "NJ", lat: 39.221, lng: -74.712 },
-        { name: "Chestnut Lake", brand: "tt", city: "Port Republic", state: "NJ", lat: 39.520, lng: -74.488 },
-        { name: "Rondout Valley", brand: "tt", city: "Accord", state: "NY", lat: 41.794, lng: -74.229 },
-        { name: "Scotrun", brand: "tt", city: "Scotrun", state: "PA", lat: 41.099, lng: -75.308 },
-        { name: "PA Dutch Country", brand: "tt", city: "Manheim", state: "PA", lat: 40.165, lng: -76.399 },
-        { name: "Hershey", brand: "tt", city: "Lebanon", state: "PA", lat: 40.363, lng: -76.385 },
-        { name: "Gettysburg Farm", brand: "tt", city: "Dover", state: "PA", lat: 39.951, lng: -76.725 },
-        { name: "Circle M", brand: "tt", city: "Lancaster", state: "PA", lat: 40.072, lng: -76.301 },
-        { name: "Timothy Lake South", brand: "tt", city: "East Stroudsburg", state: "PA", lat: 41.096, lng: -75.063 },
-        { name: "Timothy Lake North", brand: "tt", city: "East Stroudsburg", state: "PA", lat: 41.097, lng: -75.060 },
-        { name: "Hidden Cove", brand: "tt", city: "Arley", state: "AL", lat: 34.092, lng: -87.210 },
-        { name: "Three Flags", brand: "tt", city: "Wildwood", state: "FL", lat: 28.883, lng: -82.021 },
-        { name: "Peace River", brand: "tt", city: "Wauchula", state: "FL", lat: 27.554, lng: -81.826 },
-        { name: "Orlando", brand: "tt", city: "Clermont", state: "FL", lat: 28.523, lng: -81.704 },
-        { name: "Forest Lake", brand: "tt", city: "Advance", state: "NC", lat: 35.916, lng: -80.452 },
-        { name: "Lake Gaston", brand: "tt", city: "Littleton", state: "NC", lat: 36.520, lng: -77.938 },
-        { name: "Green Mountain", brand: "tt", city: "Lenoir", state: "NC", lat: 35.952, lng: -81.536 },
-        { name: "The Oaks at Point South", brand: "tt", city: "Yemassee", state: "SC", lat: 32.690, lng: -80.856 },
-        { name: "Carolina Landing", brand: "tt", city: "Fair Play", state: "SC", lat: 34.486, lng: -82.955 },
-        { name: "Natchez Trace", brand: "tt", city: "Hohenwald", state: "TN", lat: 35.544, lng: -87.553 },
-        { name: "Cherokee Landing", brand: "tt", city: "Saulsbury", state: "TN", lat: 35.181, lng: -88.446 },
-        { name: "Lake Conroe", brand: "tt", city: "Willis", state: "TX", lat: 30.424, lng: -95.494 },
-        { name: "Colorado River", brand: "tt", city: "Columbus", state: "TX", lat: 29.717, lng: -96.557 },
-        { name: "Bay Landing", brand: "tt", city: "Bridgeport", state: "TX", lat: 33.217, lng: -97.801 },
-        { name: "Lake Tawakoni", brand: "tt", city: "Point", state: "TX", lat: 32.942, lng: -95.883 },
-        { name: "Medina Lake", brand: "tt", city: "Lakehills", state: "TX", lat: 29.662, lng: -98.958 },
-        { name: "Lake Whitney", brand: "tt", city: "Whitney", state: "TX", lat: 31.951, lng: -97.342 },
-        { name: "Lake Texoma", brand: "tt", city: "Gordonville", state: "TX", lat: 33.793, lng: -96.886 },
-        { name: "Williamsburg", brand: "tt", city: "Williamsburg", state: "VA", lat: 37.245, lng: -76.769 },
-        { name: "Virginia Landing", brand: "tt", city: "Quinby", state: "VA", lat: 37.650, lng: -75.687 },
-        { name: "Lynchburg", brand: "tt", city: "Gladys", state: "VA", lat: 37.412, lng: -79.026 },
-        { name: "Harbor View", brand: "tt", city: "Colonial Beach", state: "VA", lat: 38.250, lng: -76.962 },
-        { name: "Chesapeake Bay", brand: "tt", city: "Gloucester", state: "VA", lat: 37.423, lng: -76.519 },
-        { name: "Cultus Lake", brand: "tt", city: "Lindell Beach", state: "BC", lat: 49.061, lng: -122.025 },
-        { name: "Bend-Sunriver", brand: "tt", city: "Bend", state: "OR", lat: 43.846, lng: -121.438 },
-        { name: "Pacific City", brand: "tt", city: "Cloverdale", state: "OR", lat: 45.210, lng: -123.953 },
-        { name: "Seaside", brand: "tt", city: "Seaside", state: "OR", lat: 46.019, lng: -123.923 },
-        { name: "Whalers Rest", brand: "tt", city: "South Beach", state: "OR", lat: 44.608, lng: -124.060 },
-        { name: "South Jetty", brand: "tt", city: "Florence", state: "OR", lat: 43.963, lng: -124.115 },
-        { name: "La Conner", brand: "tt", city: "La Conner", state: "WA", lat: 48.391, lng: -122.498 },
-        { name: "Grandy Creek", brand: "tt", city: "Concrete", state: "WA", lat: 48.534, lng: -121.745 },
-        { name: "Crescent Bar", brand: "tt", city: "Quincy", state: "WA", lat: 47.225, lng: -119.949 },
-        { name: "Chehalis", brand: "tt", city: "Chehalis", state: "WA", lat: 46.668, lng: -122.962 },
-        { name: "Birch Bay", brand: "tt", city: "Blaine", state: "WA", lat: 48.954, lng: -122.760 },
-        { name: "Leavenworth", brand: "tt", city: "Leavenworth", state: "WA", lat: 47.597, lng: -120.660 },
-        { name: "Little Diamond", brand: "tt", city: "Newport", state: "WA", lat: 48.113, lng: -117.258 },
-        { name: "Long Beach", brand: "tt", city: "Seaview", state: "WA", lat: 46.354, lng: -124.045 },
-        { name: "Thunderbird", brand: "tt", city: "Monroe", state: "WA", lat: 47.859, lng: -122.021 },
-        { name: "Paradise", brand: "tt", city: "Silver Creek", state: "WA", lat: 47.141, lng: -122.129 },
-        { name: "Oceana", brand: "tt", city: "Ocean City", state: "WA", lat: 47.127, lng: -124.174 },
-        { name: "Mount Vernon", brand: "tt", city: "Bow", state: "WA", lat: 48.566, lng: -122.394 },
-        { name: "Verde Valley", brand: "tt", city: "Cottonwood", state: "AZ", lat: 34.717, lng: -111.997 },
-        { name: "Snowflower", brand: "tt", city: "Emigrant Gap", state: "CA", lat: 39.307, lng: -120.685 },
-        { name: "Lake of the Springs", brand: "tt", city: "Oregon House", state: "CA", lat: 39.431, lng: -121.289 },
-        { name: "Lake Minden", brand: "tt", city: "Nicolaus", state: "CA", lat: 38.943, lng: -121.551 },
-        { name: "Idyllwild", brand: "tt", city: "Idyllwild", state: "CA", lat: 33.741, lng: -116.718 },
-        { name: "Morgan Hill", brand: "tt", city: "Morgan Hill", state: "CA", lat: 37.148, lng: -121.647 },
-        { name: "Oakzanita Springs", brand: "tt", city: "Descanso", state: "CA", lat: 32.874, lng: -116.610 },
-        { name: "San Benito", brand: "tt", city: "Paicines", state: "CA", lat: 36.467, lng: -121.076 },
-        { name: "Russian River", brand: "tt", city: "Cloverdale", state: "CA", lat: 38.793, lng: -123.002 },
-        { name: "Rancho Oso", brand: "tt", city: "Santa Barbara", state: "CA", lat: 34.639, lng: -119.636 },
-        { name: "Ponderosa", brand: "tt", city: "Lotus", state: "CA", lat: 38.801, lng: -120.937 },
-        { name: "Pio Pico", brand: "tt", city: "Jamul", state: "CA", lat: 32.701, lng: -116.845 },
-        { name: "Palm Springs", brand: "tt", city: "Palm Desert", state: "CA", lat: 33.760, lng: -116.371 },
-        { name: "Yosemite Lakes", brand: "tt", city: "Groveland", state: "CA", lat: 37.863, lng: -120.080 },
-        { name: "Wilderness Lakes RV Resort", brand: "tt", city: "Menifee", state: "CA", lat: 33.700, lng: -117.193 },
-        { name: "Turtle Beach", brand: "tt", city: "Manteca", state: "CA", lat: 37.793, lng: -121.224 },
-        { name: "Soledad Canyon", brand: "tt", city: "Acton", state: "CA", lat: 34.493, lng: -118.188 },
-        { name: "Blue Mesa Recreational Ranch", brand: "tt", city: "Gunnison", state: "CO", lat: 38.462, lng: -107.326 },
-        { name: "Las Vegas", brand: "tt", city: "Las Vegas", state: "NV", lat: 36.153, lng: -115.136 },
-        { name: "Pine Country", brand: "tt", city: "Belvidere", state: "IL", lat: 42.254, lng: -88.852 },
-        { name: "Indian Lakes", brand: "tt", city: "Batesville", state: "IN", lat: 39.304, lng: -85.222 },
-        { name: "Horseshoe Lakes", brand: "tt", city: "Clinton", state: "IN", lat: 39.663, lng: -87.441 },
-        { name: "Diamond Caverns RV & Golf Resort", brand: "tt", city: "Park City", state: "KY", lat: 37.102, lng: -86.034 },
-        { name: "Bear Cave", brand: "tt", city: "Buchanan", state: "MI", lat: 41.842, lng: -86.368 },
-        { name: "St. Clair", brand: "tt", city: "Saint Clair", state: "MI", lat: 42.824, lng: -82.505 },
-        { name: "Wilmington", brand: "tt", city: "Wilmington", state: "OH", lat: 39.445, lng: -83.828 },
-        { name: "Kenisee Lake", brand: "tt", city: "Jefferson", state: "OH", lat: 41.724, lng: -80.782 },
-        { name: "Lake George Escape", brand: "encore", city: "Lake George", state: "NY", lat: 43.43, lng: -73.71 },
-        { name: "Tahoe Valley RV Resort", brand: "encore", city: "South Lake Tahoe", state: "CA", lat: 38.91, lng: -119.99 },
-        { name: "Carolina Shores RV Resort", brand: "encore", city: "Myrtle Beach", state: "SC", lat: 33.77, lng: -78.86 },
-        { name: "Oceanside RV Resort", brand: "encore", city: "Oceanside", state: "CA", lat: 33.20, lng: -117.38 },
-        { name: "Sunshine Key RV Resort & Marina", brand: "encore", city: "Big Pine Key", state: "FL", lat: 24.67, lng: -81.35 },
-        { name: "Fiesta Key RV Resort & Marina", brand: "encore", city: "Long Key", state: "FL", lat: 24.82, lng: -80.83 },
-        { name: "Victoria Palms RV Resort", brand: "encore", city: "Donna", state: "TX", lat: 26.18, lng: -98.05 }
+      const stateLocations = [
+        { name: "Alabama", abbr: "AL", lat: 32.806671, lng: -86.791130 },
+        { name: "Alaska", abbr: "AK", lat: 61.370716, lng: -152.404419 },
+        { name: "Arizona", abbr: "AZ", lat: 33.729759, lng: -111.431221 },
+        { name: "Arkansas", abbr: "AR", lat: 34.969704, lng: -92.373123 },
+        { name: "California", abbr: "CA", lat: 36.116203, lng: -119.681564 },
+        { name: "Colorado", abbr: "CO", lat: 39.059811, lng: -105.311104 },
+        { name: "Connecticut", abbr: "CT", lat: 41.597782, lng: -72.755371 },
+        { name: "Delaware", abbr: "DE", lat: 39.318523, lng: -75.507141 },
+        { name: "Florida", abbr: "FL", lat: 27.766279, lng: -81.686783 },
+        { name: "Georgia", abbr: "GA", lat: 33.040619, lng: -83.643074 },
+        { name: "Hawaii", abbr: "HI", lat: 21.094318, lng: -157.498337 },
+        { name: "Idaho", abbr: "ID", lat: 44.240459, lng: -114.478828 },
+        { name: "Illinois", abbr: "IL", lat: 40.349457, lng: -88.986137 },
+        { name: "Indiana", abbr: "IN", lat: 39.849426, lng: -86.258278 },
+        { name: "Iowa", abbr: "IA", lat: 42.011539, lng: -93.210526 },
+        { name: "Kansas", abbr: "KS", lat: 38.526600, lng: -96.726486 },
+        { name: "Kentucky", abbr: "KY", lat: 37.668140, lng: -84.670067 },
+        { name: "Louisiana", abbr: "LA", lat: 31.169546, lng: -91.867805 },
+        { name: "Maine", abbr: "ME", lat: 44.693947, lng: -69.381927 },
+        { name: "Maryland", abbr: "MD", lat: 39.063946, lng: -76.802101 },
+        { name: "Massachusetts", abbr: "MA", lat: 42.230171, lng: -71.530106 },
+        { name: "Michigan", abbr: "MI", lat: 43.326618, lng: -84.536095 },
+        { name: "Minnesota", abbr: "MN", lat: 45.694454, lng: -93.900192 },
+        { name: "Mississippi", abbr: "MS", lat: 32.741646, lng: -89.678696 },
+        { name: "Missouri", abbr: "MO", lat: 38.456085, lng: -92.288368 },
+        { name: "Montana", abbr: "MT", lat: 46.921925, lng: -110.454353 },
+        { name: "Nebraska", abbr: "NE", lat: 41.125370, lng: -98.268082 },
+        { name: "Nevada", abbr: "NV", lat: 38.313515, lng: -117.055374 },
+        { name: "New Hampshire", abbr: "NH", lat: 43.452492, lng: -71.563896 },
+        { name: "New Jersey", abbr: "NJ", lat: 40.298904, lng: -74.521011 },
+        { name: "New Mexico", abbr: "NM", lat: 34.840515, lng: -106.248482 },
+        { name: "New York", abbr: "NY", lat: 42.165726, lng: -74.948051 },
+        { name: "North Carolina", abbr: "NC", lat: 35.630066, lng: -79.806419 },
+        { name: "North Dakota", abbr: "ND", lat: 47.528912, lng: -99.784012 },
+        { name: "Ohio", abbr: "OH", lat: 40.388783, lng: -82.764915 },
+        { name: "Oklahoma", abbr: "OK", lat: 35.565342, lng: -96.928917 },
+        { name: "Oregon", abbr: "OR", lat: 44.572021, lng: -122.070938 },
+        { name: "Pennsylvania", abbr: "PA", lat: 40.590752, lng: -77.209755 },
+        { name: "Rhode Island", abbr: "RI", lat: 41.680893, lng: -71.511780 },
+        { name: "South Carolina", abbr: "SC", lat: 33.856892, lng: -80.945007 },
+        { name: "South Dakota", abbr: "SD", lat: 44.299782, lng: -99.438828 },
+        { name: "Tennessee", abbr: "TN", lat: 35.747845, lng: -86.692345 },
+        { name: "Texas", abbr: "TX", lat: 31.054487, lng: -97.563461 },
+        { name: "Utah", abbr: "UT", lat: 40.150032, lng: -111.862434 },
+        { name: "Vermont", abbr: "VT", lat: 44.045876, lng: -72.710686 },
+        { name: "Virginia", abbr: "VA", lat: 37.769337, lng: -78.169968 },
+        { name: "Washington", abbr: "WA", lat: 47.400902, lng: -121.490494 },
+        { name: "West Virginia", abbr: "WV", lat: 38.491226, lng: -80.954456 },
+        { name: "Wisconsin", abbr: "WI", lat: 44.268543, lng: -89.616508 },
+        { name: "Wyoming", abbr: "WY", lat: 42.755966, lng: -107.302490 }
       ];
+      const stateByName = new Map(stateLocations.map((state) => [state.name, state]));
+      const stateBoundaryUrl = "https://cdn.jsdelivr.net/gh/PublicaMundi/MappingAPI@master/data/geojson/us-states.json";
+      let stateBoundaries = null;
 
       const templeLocations = [
         { name: "Laie Hawaii Temple", city: "Laie", state: "HI", lat: 21.654, lng: -157.921 },
@@ -1145,6 +1200,7 @@
         { name: "Spanish Fork Utah Temple", city: "Spanish Fork", state: "UT", lat: 40.115, lng: -111.654 },
         { name: "Flagstaff Arizona Temple", city: "Flagstaff", state: "AZ", lat: 35.198, lng: -111.651 },
         { name: "Roanoke Virginia Temple", city: "Roanoke", state: "VA", lat: 37.271, lng: -79.941 },
+        { name: "Richmond Virginia Temple", city: "Glen Allen", state: "VA", lat: 37.676, lng: -77.525 },
         { name: "Caldwell Idaho Temple", city: "Caldwell", state: "ID", lat: 43.662, lng: -116.687 },
         { name: "Tulsa Oklahoma Temple", city: "Tulsa", state: "OK", lat: 36.154, lng: -95.992 },
         { name: "Colorado Springs Colorado Temple", city: "Colorado Springs", state: "CO", lat: 38.833, lng: -104.821 },
@@ -1209,12 +1265,6 @@
       ];
 
       const templeStatusByName = new Map([
-        ["Orlando Florida Temple", "Renovation"],
-        ["Provo Utah Rock Canyon Temple", "Renovation"],
-        ["Salt Lake Temple", "Renovation"],
-        ["San Diego California Temple", "Opening Soon"],
-        ["Manhattan New York Temple", "Renovation"],
-        ["Kona Hawaii Temple", "Renovation"],
         ["Harrisburg Pennsylvania Temple", "Announced"],
         ["Charlotte North Carolina Temple", "Announced"],
         ["Winchester Virginia Temple", "Construction"],
@@ -1268,10 +1318,11 @@
         ["Tacoma Washington Temple", "Announced"],
         ["Lone Mountain Nevada Temple", "Construction"],
         ["Fairview Texas Temple", "Construction"],
-        ["Yorba Linda California Temple", "Opening Soon"],
-        ["Willamette Valley Oregon Temple", "Opening Soon"],
-        ["Lindon Utah Temple", "Opening Soon"]
       ]);
+
+      function templeIsOpen(temple) {
+        return !templeStatusByName.has(temple.name);
+      }
 
       const lower48Bounds = L.latLngBounds(
         L.latLng(24.0, -125.0),
@@ -1332,7 +1383,7 @@
       const layer = L.layerGroup().addTo(map);
       const parkLayer = L.layerGroup().addTo(map);
       const npsLayer = L.layerGroup().addTo(map);
-      const ttLayer = L.layerGroup().addTo(map);
+      const statesLayer = L.layerGroup().addTo(map);
       const templeLayer = L.layerGroup().addTo(map);
       const markersByName = new Map();
       const search = document.getElementById("search");
@@ -1342,16 +1393,14 @@
       const clearFilters = document.getElementById("clearFilters");
       const applyFilters = document.getElementById("applyFilters");
       const visitedOnlyFilter = document.getElementById("visitedOnlyFilter");
+      const shareStatus = document.getElementById("shareStatus");
+      const shareScreenshotButton = document.getElementById("shareScreenshot");
       const mapQuote = document.getElementById("mapQuote");
       const closeMapQuote = document.getElementById("closeMapQuote");
       const parksProgress = document.getElementById("parksProgress");
       const npsProgress = document.getElementById("npsProgress");
-      const ttProgress = document.getElementById("ttProgress");
+      const statesProgress = document.getElementById("statesProgress");
       const templeProgress = document.getElementById("templeProgress");
-      const toggleNpsMap = document.getElementById("toggleNpsMap");
-      const toggleParksMap = document.getElementById("toggleParksMap");
-      const toggleTtMap = document.getElementById("toggleTtMap");
-      const toggleTemplesMap = document.getElementById("toggleTemplesMap");
       const toggleAllCategoriesButtons = [...document.querySelectorAll("[data-toggle-all-categories]")];
       const categoryTabButtons = [...document.querySelectorAll("[data-category-tab]")];
       const categoryPanels = [...document.querySelectorAll("[data-category-panel]")];
@@ -1366,16 +1415,214 @@
         localStorage.setItem(npsStorageKey, JSON.stringify([...visitedSites]));
       }
 
-      function saveTtVisited() {
-        localStorage.setItem(ttVisitedKey, JSON.stringify([...ttVisited]));
-      }
-
-      function saveTtNotes() {
-        localStorage.setItem(ttNotesKey, JSON.stringify(ttNotes));
+      function saveStatesVisited() {
+        localStorage.setItem(statesVisitedKey, JSON.stringify([...statesVisited]));
       }
 
       function saveTempleComplete() {
         localStorage.setItem(templeCompleteKey, JSON.stringify([...templeComplete]));
+      }
+
+      function savePlaceMemories() {
+        try {
+          localStorage.setItem(placeMemoriesKey, JSON.stringify(placeMemories));
+          return true;
+        } catch (error) {
+          console.warn("Could not save place memory", error);
+          return false;
+        }
+      }
+
+      function escapeHtml(value) {
+        return String(value || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      function limitWords(value, maxWords = 200) {
+        const words = String(value || "").trim().split(/\s+/).filter(Boolean);
+        if (words.length <= maxWords) return String(value || "");
+        return words.slice(0, maxWords).join(" ");
+      }
+
+      function countWords(value) {
+        return String(value || "").trim().split(/\s+/).filter(Boolean).length;
+      }
+
+      function placeMemoryMarkup(placeKey) {
+        const memory = placeMemories[placeKey] || {};
+        const note = limitWords(memory.note || "");
+        const wordCount = countWords(note);
+        const escapedPlaceKey = escapeHtml(placeKey);
+        return `
+          <div class="popup-memory">
+            <textarea data-place-note="${escapedPlaceKey}" placeholder="Add notes here...">${escapeHtml(note)}</textarea>
+            <div class="popup-memory-count" data-place-note-count="${escapedPlaceKey}">${wordCount}/200 words</div>
+            <input class="popup-photo-input" data-place-photo="${escapedPlaceKey}" type="file" accept="image/*">
+            ${memory.photo ? `<img class="popup-photo-preview" data-place-photo-preview="${escapedPlaceKey}" src="${escapeHtml(memory.photo)}" alt="">` : `<img class="popup-photo-preview" data-place-photo-preview="${escapedPlaceKey}" src="" alt="" hidden>`}
+            <button data-place-note-save="${escapedPlaceKey}">Save</button>
+          </div>
+        `;
+      }
+
+      function getPlaceMemoryControls(popup, placeKey) {
+        const findMemoryControl = (selector, keyName) => [...popup.querySelectorAll(selector)]
+          .find((control) => control.dataset[keyName] === placeKey);
+        return {
+          noteField: findMemoryControl("[data-place-note]", "placeNote"),
+          wordCount: findMemoryControl("[data-place-note-count]", "placeNoteCount"),
+          saveNoteButton: findMemoryControl("[data-place-note-save]", "placeNoteSave"),
+          photoInput: findMemoryControl("[data-place-photo]", "placePhoto"),
+          photoPreview: findMemoryControl("[data-place-photo-preview]", "placePhotoPreview")
+        };
+      }
+
+      function capturePlaceNoteFromPopup(popup, placeKey) {
+        if (!popup) return false;
+        const { noteField, wordCount } = getPlaceMemoryControls(popup, placeKey);
+        if (!noteField) return false;
+        const limitedNote = limitWords(noteField.value);
+        noteField.value = limitedNote;
+        if (!placeMemories[placeKey]) placeMemories[placeKey] = {};
+        placeMemories[placeKey].note = limitedNote;
+        if (wordCount) wordCount.textContent = `${countWords(limitedNote)}/200 words`;
+        return true;
+      }
+
+      async function savePlaceMemoryFromPopup(popup, placeKey, options = {}) {
+        if (!popup) return false;
+        const { photoInput } = getPlaceMemoryControls(popup, placeKey);
+        if (!capturePlaceNoteFromPopup(popup, placeKey)) return false;
+        const selectedPhoto = photoInput?.files?.[0];
+        const selectedPhotoKey = selectedPhoto ? `${selectedPhoto.name}:${selectedPhoto.size}:${selectedPhoto.lastModified}` : "";
+        if (options.includeSelectedPhoto && selectedPhoto && photoInput.pendingPhotoKey !== selectedPhotoKey) {
+          photoInput.pendingPhoto = await readPhotoForStorage(selectedPhoto);
+          photoInput.pendingPhotoKey = selectedPhotoKey;
+        }
+        if (photoInput?.pendingPhoto) placeMemories[placeKey].photo = photoInput.pendingPhoto;
+        return savePlaceMemories();
+      }
+
+      function queuePlaceMemorySave(popup, placeKey) {
+        savePlaceMemoryFromPopup(popup, placeKey).catch((error) => {
+          console.warn("Could not save place memory", error);
+        });
+      }
+
+      async function savePlaceMemoryFromButton(saveButton, popup, placeKey) {
+        saveButton.textContent = "Saving";
+        try {
+          const saved = await savePlaceMemoryFromPopup(popup, placeKey, { includeSelectedPhoto: true });
+          saveButton.textContent = saved ? "Saved" : "Save failed";
+        } catch (error) {
+          console.warn("Could not save place memory", error);
+          saveButton.textContent = "Save failed";
+        } finally {
+          window.setTimeout(() => {
+            saveButton.textContent = "Save";
+          }, 1200);
+        }
+      }
+
+      document.addEventListener("click", async (event) => {
+        const saveButton = event.target.closest?.("[data-place-note-save]");
+        if (!saveButton) return;
+        const popup = saveButton.closest(".leaflet-popup");
+        const placeKey = saveButton.dataset.placeNoteSave;
+        if (!popup || !placeKey) return;
+        event.preventDefault();
+        savePlaceMemoryFromButton(saveButton, popup, placeKey);
+      });
+
+      function readPhotoForStorage(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onerror = () => reject(new Error("Could not read photo."));
+          reader.onload = () => {
+            const image = new Image();
+            image.onerror = () => resolve(reader.result);
+            image.onload = () => {
+              const maxSize = 900;
+              const scale = Math.min(1, maxSize / Math.max(image.width, image.height));
+              const canvas = document.createElement("canvas");
+              canvas.width = Math.max(1, Math.round(image.width * scale));
+              canvas.height = Math.max(1, Math.round(image.height * scale));
+              canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
+              resolve(canvas.toDataURL("image/jpeg", 0.76));
+            };
+            image.src = reader.result;
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      function bindPlaceMemoryControls(popup, placeKey) {
+        const { noteField, wordCount, saveNoteButton, photoInput, photoPreview } = getPlaceMemoryControls(popup, placeKey);
+
+        if (noteField) {
+          noteField.oninput = () => {
+            const limitedNote = limitWords(noteField.value);
+            if (limitedNote !== noteField.value) noteField.value = limitedNote;
+            capturePlaceNoteFromPopup(popup, placeKey);
+            window.clearTimeout(noteField.memorySaveTimer);
+            noteField.memorySaveTimer = window.setTimeout(() => {
+              queuePlaceMemorySave(popup, placeKey);
+            }, 250);
+          };
+          noteField.onchange = () => queuePlaceMemorySave(popup, placeKey);
+          noteField.onblur = () => queuePlaceMemorySave(popup, placeKey);
+        }
+
+        popup.querySelector(".leaflet-popup-close-button")?.addEventListener("click", () => {
+          queuePlaceMemorySave(popup, placeKey);
+        }, { capture: true });
+
+        if (saveNoteButton) {
+          saveNoteButton.onclick = (event) => {
+            event.preventDefault();
+            savePlaceMemoryFromButton(saveNoteButton, popup, placeKey);
+          };
+        }
+
+        if (photoInput) {
+          photoInput.onchange = async () => {
+            const file = photoInput.files?.[0];
+            if (!file) return;
+            capturePlaceNoteFromPopup(popup, placeKey);
+            if (saveNoteButton) saveNoteButton.textContent = "Saving photo";
+            try {
+              const photo = await readPhotoForStorage(file);
+              const photoKey = `${file.name}:${file.size}:${file.lastModified}`;
+              if (!placeMemories[placeKey]) placeMemories[placeKey] = {};
+              placeMemories[placeKey].photo = photo;
+              if (photoPreview) {
+                photoPreview.src = photo;
+                photoPreview.hidden = false;
+              }
+              photoInput.pendingPhoto = photo;
+              photoInput.pendingPhotoKey = photoKey;
+              capturePlaceNoteFromPopup(popup, placeKey);
+              if (saveNoteButton) {
+                const saved = await savePlaceMemoryFromPopup(popup, placeKey);
+                saveNoteButton.textContent = saved ? "Photo saved" : "Save failed";
+              } else {
+                queuePlaceMemorySave(popup, placeKey);
+              }
+            } catch (error) {
+              console.warn("Could not save photo", error);
+              if (saveNoteButton) saveNoteButton.textContent = "Photo failed";
+            } finally {
+              if (saveNoteButton) {
+                window.setTimeout(() => {
+                  saveNoteButton.textContent = "Save";
+                }, 1200);
+              }
+            }
+          };
+        }
       }
 
       function getUnitType(unit) {
@@ -1411,20 +1658,15 @@
         };
       }
 
-      function ttColor(location) {
-        if (ttVisited.has(location.name)) return "#7c8792";
-        if (ttNotes[location.name]) return "#2aa7a1";
-        return location.brand === "tt" ? "#1f5c2a" : "#8fd18a";
-      }
-
-      function templeColor(temple) {
-        if (templeComplete.has(temple.name)) return "#7c8792";
-        const status = templeStatusByName.get(temple.name);
-        return status === "Announced" || status === "Construction" ? "#f4d46f" : "#d4a62a";
-      }
-
-      function npsColor(site) {
-        return visitedSites.has(site.name) ? "#7c8792" : "#2e6fbb";
+      function stateStyle(state) {
+        const isVisited = statesVisited.has(state.name);
+        return {
+          color: "#1f5c2a",
+          weight: isVisited ? 2 : 1.4,
+          opacity: 0.9,
+          fillColor: isVisited ? "#c8f7c5" : "#ffffff",
+          fillOpacity: isVisited ? 0.72 : 0.04
+        };
       }
 
       const allStates = [...new Set(
@@ -1452,18 +1694,23 @@
         return stateFilter.size === 0 || stateFilter.has(state);
       }
 
-      function matchesTtFilters(location) {
+      function matchesStateLocationFilters(state) {
         const term = searchTerm.trim().toLowerCase();
         const matchesSearch =
           !term ||
-          location.name.toLowerCase().includes(term) ||
-          location.city.toLowerCase().includes(term) ||
-          (stateNames[location.state] || location.state).toLowerCase().includes(term);
-        const matchesVisited = !showVisitedOnly || ttVisited.has(location.name);
-        return matchesSearch && matchesStateChip(location.state) && matchesVisited;
+          state.name.toLowerCase().includes(term) ||
+          state.abbr.toLowerCase().includes(term);
+        const matchesVisited = !showVisitedOnly || statesVisited.has(state.name);
+        return matchesSearch && matchesStateChip(state.abbr) && matchesVisited;
+      }
+
+      function stateFromFeature(feature) {
+        const name = feature?.properties?.name;
+        return stateByName.get(name) || null;
       }
 
       function matchesTempleFilters(temple) {
+        if (!templeIsOpen(temple)) return false;
         const term = searchTerm.trim().toLowerCase();
         const matchesSearch =
           !term ||
@@ -1474,40 +1721,50 @@
         return matchesSearch && matchesStateChip(temple.state) && matchesVisited;
       }
 
+      function withoutVisitedOnly(callback) {
+        const previous = showVisitedOnly;
+        showVisitedOnly = false;
+        const result = callback();
+        showVisitedOnly = previous;
+        return result;
+      }
+
       function createMarker(park) {
-        const color = visited.has(park.name) ? "#7c8792" : "#c74a39";
+        const isVisited = visited.has(park.name);
+        const color = "#c74a39";
         return L.circleMarker([park.lat, park.lng], {
           radius: 8,
           color,
-          weight: 2,
-          fillColor: color,
-          fillOpacity: visited.has(park.name) ? 0.75 : 0.85
+          weight: isVisited ? 1.4 : 2,
+          fillColor: isVisited ? "#f7cfd8" : color,
+          fillOpacity: isVisited ? 0.75 : 0.85
         }).bindPopup(popupMarkup(park), popupOptions);
       }
 
       function popupMarkup(park) {
         const isVisited = park.type === "park" ? visited.has(park.name) : visitedSites.has(park.name);
+        const placeKey = `${park.type}:${park.name}`;
         return `
           <div class="popup">
             <strong>${park.name}</strong>
             <div class="muted">${park.states.map((s) => stateNames[s] || s).join(", ")}</div>
             <div class="muted">${park.type === "park" ? "Official national park" : "Other NPS site"}</div>
             <button data-park="${park.name}" data-type="${park.type}">${isVisited ? "Uncheck visited" : "Mark visited"}</button>
+            ${placeMemoryMarkup(placeKey)}
           </div>
         `;
       }
 
-      function ttPopupMarkup(location) {
-        const note = ttNotes[location.name] || "";
-        const visited = ttVisited.has(location.name);
+      function statePopupMarkup(state) {
+        const visited = statesVisited.has(state.name);
         return `
           <div class="popup">
-            <strong>${location.name}</strong>
-            <div class="muted">${location.city}, ${location.state}</div>
-            <div class="muted">${location.brand === "tt" ? "Thousand Trails" : "Encore"}</div>
-            <button data-tt-visited="${location.name}">${visited ? "Uncheck visited" : "I've been here"}</button>
-            <textarea data-tt-note="${location.name}" placeholder="Add notes here...">${note}</textarea>
-            <button data-tt-save-note="${location.name}">Save note</button>
+            <strong>${state.name}</strong>
+            <div class="muted">${state.abbr}</div>
+            <label class="popup-check">
+              <input type="checkbox" data-state-visited="${state.name}" ${visited ? "checked" : ""}>
+              <span>I've been here</span>
+            </label>
           </div>
         `;
       }
@@ -1515,12 +1772,14 @@
       function templePopupMarkup(temple) {
         const complete = templeComplete.has(temple.name);
         const status = templeStatusByName.get(temple.name) || "Dedicated";
+        const placeKey = `temple:${temple.name}`;
         return `
           <div class="popup">
             <strong>${temple.name}</strong>
             <div class="muted">${temple.city}, ${temple.state}</div>
             <div class="muted">LDS temple · ${status}</div>
             <button data-temple-complete="${temple.name}">${complete ? "Undo complete" : "Mark complete"}</button>
+            ${placeMemoryMarkup(placeKey)}
           </div>
         `;
       }
@@ -1595,8 +1854,8 @@
         return allUnits.filter((park) => park.type === "site" && matchesFilters(park)).length;
       }
 
-      function countFilteredTt() {
-        return ttLocations.filter(matchesTtFilters).length;
+      function countFilteredStates() {
+        return stateLocations.filter(matchesStateLocationFilters).length;
       }
 
       function countFilteredTemples() {
@@ -1618,7 +1877,8 @@
         render();
       }
 
-      function progressMarkup(done, total, doneLabel) {
+      function progressMarkup(done, total, doneLabel, hideNumbers = false) {
+        if (hideNumbers) return "";
         return `
           <div class="metric">
             <strong>${done}</strong>
@@ -1632,20 +1892,24 @@
       }
 
       function renderSummary() {
-        const filteredParks = parks.filter(matchesFilters);
-        const filteredSites = allUnits.filter((park) => park.type === "site" && matchesFilters(park));
-        const filteredTt = ttLocations.filter(matchesTtFilters);
-        const filteredTemples = templeLocations.filter(matchesTempleFilters);
-        parksProgress.innerHTML = progressMarkup(filteredParks.filter((park) => visited.has(park.name)).length, filteredParks.length, "visited");
-        npsProgress.innerHTML = progressMarkup(filteredSites.filter((site) => visitedSites.has(site.name)).length, filteredSites.length, "visited");
-        ttProgress.innerHTML = progressMarkup(filteredTt.filter((location) => ttVisited.has(location.name)).length, filteredTt.length, "visited");
-        templeProgress.innerHTML = progressMarkup(filteredTemples.filter((temple) => templeComplete.has(temple.name)).length, filteredTemples.length, "complete");
+        const filteredParks = withoutVisitedOnly(() => parks.filter(matchesFilters));
+        const filteredSites = withoutVisitedOnly(() => allUnits.filter((park) => park.type === "site" && matchesFilters(park)));
+        const filteredStates = withoutVisitedOnly(() => stateLocations.filter(matchesStateLocationFilters));
+        const filteredTemples = withoutVisitedOnly(() => templeLocations.filter(matchesTempleFilters));
+        const hideProgressNumbers = showVisitedOnly && allCategoriesAreOn();
+        parksProgress.innerHTML = progressMarkup(filteredParks.filter((park) => visited.has(park.name)).length, filteredParks.length, "visited", hideProgressNumbers);
+        npsProgress.innerHTML = progressMarkup(filteredSites.filter((site) => visitedSites.has(site.name)).length, filteredSites.length, "visited", hideProgressNumbers);
+        statesProgress.innerHTML = progressMarkup(filteredStates.filter((state) => statesVisited.has(state.name)).length, filteredStates.length, "visited", hideProgressNumbers);
+        templeProgress.innerHTML = progressMarkup(filteredTemples.filter((temple) => templeComplete.has(temple.name)).length, filteredTemples.length, "complete", hideProgressNumbers);
       }
 
       function renderCategoryTabs() {
         categoryTabButtons.forEach((button) => {
           const isActive = button.dataset.categoryTab === activeCategory;
           button.classList.toggle("active", isActive);
+          const isVisible = categoryIsOnMap(button.dataset.categoryTab);
+          button.classList.toggle("map-visible", isVisible);
+          button.setAttribute("aria-pressed", String(isVisible));
         });
         categoryPanels.forEach((panel) => {
           const isActive = panel.dataset.categoryPanel === activeCategory;
@@ -1654,14 +1918,29 @@
       }
 
       function allCategoriesAreOn() {
-        return showParksOnMap && showNpsOnMap && showTtOnMap && showTemplesOnMap;
+        return showParksOnMap && showNpsOnMap && showStatesOnMap && showTemplesOnMap;
       }
 
       function setAllCategoriesOnMap(visible) {
         showParksOnMap = visible;
         showNpsOnMap = visible;
-        showTtOnMap = visible;
+        showStatesOnMap = visible;
         showTemplesOnMap = visible;
+      }
+
+      function categoryIsOnMap(category) {
+        if (category === "parks") return showParksOnMap;
+        if (category === "nps") return showNpsOnMap;
+        if (category === "states") return showStatesOnMap;
+        if (category === "temples") return showTemplesOnMap;
+        return false;
+      }
+
+      function toggleCategoryOnMap(category) {
+        if (category === "parks") showParksOnMap = !showParksOnMap;
+        if (category === "nps") showNpsOnMap = !showNpsOnMap;
+        if (category === "states") showStatesOnMap = !showStatesOnMap;
+        if (category === "temples") showTemplesOnMap = !showTemplesOnMap;
       }
 
       function renderMarkers(filtered) {
@@ -1671,8 +1950,13 @@
           markersByName.set(park.name, marker);
           marker.on("popupopen", (event) => {
             makePopupDraggable(event.popup);
-            const button = event.popup.getElement()?.querySelector(`[data-park="${CSS.escape(park.name)}"]`);
+            const popup = event.popup.getElement();
+            const button = popup?.querySelector(`[data-park="${CSS.escape(park.name)}"]`);
             if (button) button.onclick = () => toggleVisited(park.name);
+            if (popup) bindPlaceMemoryControls(popup, `${park.type}:${park.name}`);
+          });
+          marker.on("popupclose", (event) => {
+            queuePlaceMemorySave(event.popup.getElement(), `${park.type}:${park.name}`);
           });
         });
       }
@@ -1681,65 +1965,83 @@
         npsLayer.clearLayers();
         if (!showNpsOnMap) return;
         filtered.forEach((park) => {
-          const color = npsColor(park);
+          const isVisited = visitedSites.has(park.name);
+          const color = "#2e6fbb";
           const marker = L.circleMarker([park.lat, park.lng], {
             radius: 7,
             color,
-            weight: 2,
-            fillColor: color,
-            fillOpacity: visitedSites.has(park.name) ? 0.75 : 0.85
+            weight: isVisited ? 1.4 : 2,
+            fillColor: isVisited ? "#cfe8ff" : color,
+            fillOpacity: isVisited ? 0.75 : 0.85
           }).addTo(npsLayer);
           markersByName.set(park.name, marker);
           marker.bindPopup(popupMarkup(park), popupOptions);
           marker.on("popupopen", (event) => {
             makePopupDraggable(event.popup);
-            const button = event.popup.getElement()?.querySelector(`[data-park="${CSS.escape(park.name)}"]`);
+            const popup = event.popup.getElement();
+            const button = popup?.querySelector(`[data-park="${CSS.escape(park.name)}"]`);
             if (button) button.onclick = () => toggleVisited(park.name);
+            if (popup) bindPlaceMemoryControls(popup, `${park.type}:${park.name}`);
+          });
+          marker.on("popupclose", (event) => {
+            queuePlaceMemorySave(event.popup.getElement(), `${park.type}:${park.name}`);
           });
         });
       }
 
-      function renderTtMarkers() {
-        ttLayer.clearLayers();
-        if (!showTtOnMap) return;
-        ttLocations.filter(matchesTtFilters).forEach((location) => {
-          const color = ttColor(location);
-          const marker = L.circleMarker([location.lat, location.lng], {
-            radius: 8,
-            color,
-            weight: 2,
-            fillColor: color,
-            fillOpacity: 0.9
-          }).addTo(ttLayer);
-          markersByName.set(location.name, marker);
-          marker.bindPopup(ttPopupMarkup(location), popupOptions);
-          marker.on("popupopen", (event) => {
-            makePopupDraggable(event.popup);
-            const popup = event.popup.getElement();
-            if (!popup) return;
-            const visitedButton = popup.querySelector(`[data-tt-visited="${CSS.escape(location.name)}"]`);
-            const saveButton = popup.querySelector(`[data-tt-save-note="${CSS.escape(location.name)}"]`);
-            if (visitedButton) {
-              visitedButton.onclick = () => {
-                if (ttVisited.has(location.name)) ttVisited.delete(location.name);
-                else ttVisited.add(location.name);
-                saveTtVisited();
-                render();
-                const markerAgain = markersByName.get(location.name);
-                if (markerAgain) markerAgain.openPopup();
-              };
-            }
-            if (saveButton) {
-              saveButton.onclick = () => {
-                const field = popup.querySelector(`[data-tt-note="${CSS.escape(location.name)}"]`);
-                ttNotes[location.name] = field.value;
-                saveTtNotes();
-                render();
-                const markerAgain = markersByName.get(location.name);
-                if (markerAgain) markerAgain.openPopup();
-              };
-            }
-          });
+      function toggleStateVisited(state, shape) {
+        if (statesVisited.has(state.name)) statesVisited.delete(state.name);
+        else statesVisited.add(state.name);
+        saveStatesVisited();
+        if (shape) shape.setStyle(stateStyle(state));
+        if (showVisitedOnly) {
+          render();
+          const shapeAgain = markersByName.get(state.name);
+          if (shapeAgain && statesVisited.has(state.name)) shapeAgain.openPopup();
+          return;
+        }
+        renderSummary();
+      }
+
+      function renderStateMarkers() {
+        statesLayer.clearLayers();
+        if (!showStatesOnMap || !stateBoundaries) return;
+        L.geoJSON(stateBoundaries, {
+          filter: (feature) => {
+            const state = stateFromFeature(feature);
+            return Boolean(state && matchesStateLocationFilters(state));
+          },
+          style: (feature) => {
+            const state = stateFromFeature(feature);
+            return stateStyle(state);
+          },
+          onEachFeature: (feature, shape) => {
+            const state = stateFromFeature(feature);
+            if (!state) return;
+            shape.bindPopup(statePopupMarkup(state), popupOptions);
+            shape.on({
+              mouseover: () => shape.setStyle({ weight: 2.6, fillOpacity: statesVisited.has(state.name) ? 0.82 : 0.13 }),
+              mouseout: () => shape.setStyle(stateStyle(state)),
+              popupopen: (event) => {
+                makePopupDraggable(event.popup);
+                const popup = event.popup.getElement();
+                const visitedBox = popup?.querySelector(`[data-state-visited="${CSS.escape(state.name)}"]`);
+                if (visitedBox) {
+                  visitedBox.onchange = () => toggleStateVisited(state, shape);
+                }
+              }
+            });
+            markersByName.set(state.name, shape);
+          }
+        }).addTo(statesLayer);
+        statesLayer.eachLayer((geoJsonLayer) => {
+          if (geoJsonLayer.eachLayer) {
+            geoJsonLayer.eachLayer((shape) => {
+              if (shape.bringToBack) shape.bringToBack();
+            });
+          } else if (geoJsonLayer.bringToBack) {
+            geoJsonLayer.bringToBack();
+          }
         });
       }
 
@@ -1747,12 +2049,13 @@
         templeLayer.clearLayers();
         if (!showTemplesOnMap) return;
         templeLocations.filter(matchesTempleFilters).forEach((temple) => {
-          const color = templeColor(temple);
+          const isComplete = templeComplete.has(temple.name);
+          const color = "#d4a62a";
           const marker = L.circleMarker([temple.lat, temple.lng], {
             radius: 8,
             color,
-            weight: 2,
-            fillColor: color,
+            weight: isComplete ? 1.4 : 2,
+            fillColor: isComplete ? "#fff1b8" : color,
             fillOpacity: 0.9
           }).addTo(templeLayer);
           markersByName.set(temple.name, marker);
@@ -1762,6 +2065,7 @@
             const popup = event.popup.getElement();
             if (!popup) return;
             const completeButton = popup.querySelector(`[data-temple-complete="${CSS.escape(temple.name)}"]`);
+            bindPlaceMemoryControls(popup, `temple:${temple.name}`);
             if (completeButton) {
               completeButton.onclick = () => {
                 if (templeComplete.has(temple.name)) templeComplete.delete(temple.name);
@@ -1773,6 +2077,9 @@
               };
             }
           });
+          marker.on("popupclose", (event) => {
+            queuePlaceMemorySave(event.popup.getElement(), `temple:${temple.name}`);
+          });
         });
       }
 
@@ -1782,22 +2089,14 @@
         const filteredSites = allUnits.filter((park) => park.type === "site" && matchesFilters(park));
         renderMarkers(showParksOnMap ? filteredParks : []);
         renderNpsMarkers(filteredSites);
-        renderTtMarkers();
+        renderStateMarkers();
         renderTempleMarkers();
         renderCategoryTabs();
-        toggleParksMap.textContent = showParksOnMap ? "Off map" : "On map";
-        toggleParksMap.classList.toggle("active", showParksOnMap);
-        toggleNpsMap.textContent = showNpsOnMap ? "Off map" : "On map";
-        toggleNpsMap.classList.toggle("active", showNpsOnMap);
-        toggleTtMap.textContent = showTtOnMap ? "Off map" : "On map";
-        toggleTtMap.classList.toggle("active", showTtOnMap);
-        toggleTemplesMap.textContent = showTemplesOnMap ? "Off map" : "On map";
-        toggleTemplesMap.classList.toggle("active", showTemplesOnMap);
         toggleAllCategoriesButtons.forEach((button) => {
           button.textContent = allCategoriesAreOn() ? "All off" : "All on";
           button.classList.toggle("active", allCategoriesAreOn());
         });
-        visitedOnlyFilter.textContent = showVisitedOnly ? "Showing places I’ve been" : "Show places I’ve been";
+        visitedOnlyFilter.textContent = showVisitedOnly ? "Showing places I’ve been" : "Show only places I’ve been";
         visitedOnlyFilter.classList.toggle("active", showVisitedOnly);
         renderSummary();
       }
@@ -1841,28 +2140,90 @@
         render();
       });
 
+      function canvasToBlob(canvas) {
+        return new Promise((resolve) => canvas.toBlob(resolve, "image/png", 0.95));
+      }
+
+      function downloadScreenshot(blob) {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "journeypins-screenshot.png";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+      }
+
+      async function createScreenCaptureBlob() {
+        if (!navigator.mediaDevices?.getDisplayMedia) {
+          throw new Error("Screen capture is not supported in this browser.");
+        }
+        shareStatus.textContent = "Choose the JourneyPins tab if available.";
+        const stream = await navigator.mediaDevices.getDisplayMedia({
+          video: {
+            displaySurface: "browser"
+          },
+          audio: false,
+          preferCurrentTab: true
+        });
+        try {
+          const video = document.createElement("video");
+          video.srcObject = stream;
+          await new Promise((resolve) => {
+            video.onloadedmetadata = resolve;
+            video.play();
+          });
+          const appRect = document.querySelector(".app").getBoundingClientRect();
+          const scaleX = video.videoWidth / window.innerWidth;
+          const scaleY = Math.min(scaleX, video.videoHeight / window.innerHeight);
+          const sourceWidth = Math.min(video.videoWidth, Math.round(appRect.width * scaleX));
+          const sourceHeight = Math.min(video.videoHeight, Math.round(appRect.height * scaleY));
+          const sourceX = Math.max(0, Math.round(appRect.left * scaleX));
+          const sourceY = Math.max(0, video.videoHeight - sourceHeight);
+          const canvas = document.createElement("canvas");
+          canvas.width = sourceWidth;
+          canvas.height = sourceHeight;
+          canvas.getContext("2d").drawImage(
+            video,
+            sourceX,
+            sourceY,
+            sourceWidth,
+            sourceHeight,
+            0,
+            0,
+            sourceWidth,
+            sourceHeight
+          );
+          const blob = await canvasToBlob(canvas);
+          if (!blob) throw new Error("Could not create screenshot.");
+          return blob;
+        } finally {
+          stream.getTracks().forEach((track) => track.stop());
+        }
+      }
+
+      async function saveScreenshot() {
+        shareStatus.textContent = "Creating screen cap...";
+        const blob = await createScreenCaptureBlob();
+        downloadScreenshot(blob);
+        shareStatus.textContent = "Screen cap saved to Downloads.";
+      }
+
+      shareScreenshotButton.addEventListener("click", async () => {
+        shareScreenshotButton.disabled = true;
+        try {
+          await saveScreenshot();
+        } catch (error) {
+          console.error(error);
+          shareStatus.textContent = "Could not save screen cap.";
+        } finally {
+          shareScreenshotButton.disabled = false;
+        }
+      });
+
       closeMapQuote.addEventListener("click", () => {
         mapQuote.classList.add("hidden");
-      });
-
-      toggleParksMap.addEventListener("click", () => {
-        showParksOnMap = !showParksOnMap;
-        render();
-      });
-
-      toggleNpsMap.addEventListener("click", () => {
-        showNpsOnMap = !showNpsOnMap;
-        render();
-      });
-
-      toggleTtMap.addEventListener("click", () => {
-        showTtOnMap = !showTtOnMap;
-        render();
-      });
-
-      toggleTemplesMap.addEventListener("click", () => {
-        showTemplesOnMap = !showTemplesOnMap;
-        render();
       });
 
       toggleAllCategoriesButtons.forEach((button) => {
@@ -1875,6 +2236,7 @@
       categoryTabButtons.forEach((button) => {
         button.addEventListener("click", () => {
           activeCategory = button.dataset.categoryTab;
+          toggleCategoryOnMap(button.dataset.categoryTab);
           render();
         });
       });
@@ -1892,6 +2254,19 @@
           }
         }
       });
+
+      async function loadStateBoundaries() {
+        const response = await fetch(stateBoundaryUrl);
+        if (!response.ok) {
+          throw new Error(`State boundary request failed: ${response.status}`);
+        }
+        const data = await response.json();
+        stateBoundaries = {
+          ...data,
+          features: (data.features || []).filter((feature) => stateFromFeature(feature))
+        };
+        render();
+      }
 
       async function loadNpsData(apiKey) {
         const url = "https://developer.nps.gov/api/v1/parks?limit=500&fields=parkCode,fullName,designation,states,latLong";
@@ -1926,6 +2301,7 @@
       }
 
       async function init() {
+        loadStateBoundaries().catch((error) => console.error(error));
         try {
           const apiKey = await loadApiKeyFromEnv();
           loadNpsData(apiKey).catch((error) => console.error(error));

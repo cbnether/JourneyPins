@@ -475,8 +475,10 @@
       }
 
       .category-tab-row {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: stretch;
         gap: 6px;
         margin-top: 12px;
         padding: 6px;
@@ -505,6 +507,7 @@
         align-items: center;
         justify-content: center;
         gap: 8px;
+        flex: 0 0 calc((100% - 12px) / 3);
         min-height: 52px;
         text-align: center;
         line-height: 1.1;
@@ -536,6 +539,10 @@
       .category-tab-button[data-category-tab="temples"] {
         background: linear-gradient(135deg, #d4a62a, #f3d06d);
         color: #2f2500;
+      }
+
+      .category-tab-button[data-category-tab="church"] {
+        background: linear-gradient(135deg, #6f245f, #963a7d);
       }
 
       .category-tab-button .dot {
@@ -865,6 +872,7 @@
             <button class="category-tab-button" data-category-tab="nps">NPS Sites</button>
             <button class="category-tab-button" data-category-tab="states">50 States</button>
             <button class="category-tab-button" data-category-tab="temples">Temples</button>
+            <button class="category-tab-button" data-category-tab="church">Church History</button>
           </div>
           <div class="category-tabs">
             <div class="category-panel active" data-category-panel="parks">
@@ -897,6 +905,14 @@
                   <button class="button brand-all" data-toggle-all-categories>All off</button>
                 </div>
                 <div class="progress-card" id="templeProgress"></div>
+              </div>
+            </div>
+            <div class="category-panel" data-category-panel="church">
+              <div class="category-tab">
+                <div class="category-controls">
+                  <button class="button brand-all" data-toggle-all-categories>All off</button>
+                </div>
+                <div class="progress-card" id="churchProgress"></div>
               </div>
             </div>
           </div>
@@ -1032,12 +1048,14 @@
       const npsStorageKey = "npb-nps-visited-v1";
       const statesVisitedKey = "npb-states-visited-v1";
       const templeCompleteKey = "npb-temple-complete-v1";
+      const churchHistoryVisitedKey = "npb-church-history-visited-v1";
       const placeMemoriesKey = "npb-place-memories-v1";
       const bundledNpsApiKey = "NHwal6BG71ikZNdXYqOQ0QR390ap0cTWhHO8XUtI";
       const visited = new Set(JSON.parse(localStorage.getItem(storageKey) || "[]"));
       const visitedSites = new Set(JSON.parse(localStorage.getItem(npsStorageKey) || "[]"));
       const statesVisited = new Set(JSON.parse(localStorage.getItem(statesVisitedKey) || "[]"));
       const templeComplete = new Set(JSON.parse(localStorage.getItem(templeCompleteKey) || "[]"));
+      const churchHistoryVisited = new Set(JSON.parse(localStorage.getItem(churchHistoryVisitedKey) || "[]"));
       const placeMemories = JSON.parse(localStorage.getItem(placeMemoriesKey) || "{}");
       const stateFilter = new Set();
       let searchTerm = "";
@@ -1047,6 +1065,7 @@
       let showNpsOnMap = false;
       let showStatesOnMap = false;
       let showTemplesOnMap = false;
+      let showChurchOnMap = false;
       const stateLocations = [
         { name: "Alabama", abbr: "AL", lat: 32.806671, lng: -86.791130 },
         { name: "Alaska", abbr: "AK", lat: 61.370716, lng: -152.404419 },
@@ -1102,6 +1121,23 @@
       const stateByName = new Map(stateLocations.map((state) => [state.name, state]));
       const stateBoundaryUrl = "https://cdn.jsdelivr.net/gh/PublicaMundi/MappingAPI@master/data/geojson/us-states.json";
       let stateBoundaries = null;
+
+      const churchHistoryLocations = [
+        { name: "Joseph Smith Birthplace", location: "Sharon, VT", state: "VT", lat: 43.895, lng: -72.488 },
+        { name: "First Vision", location: "Sacred Grove, Palmyra, NY", state: "NY", lat: 43.039, lng: -77.236 },
+        { name: "Book of Mormon", location: "Hill Cumorah, Palmyra, NY", state: "NY", lat: 43.004, lng: -77.230 },
+        { name: "Priesthood Restoration", location: "Susquehanna, PA", state: "PA", lat: 41.947, lng: -75.602 },
+        { name: "Kirtland Temple", location: "Kirtland, OH", state: "OH", lat: 41.625, lng: -81.362 },
+        { name: "Historic Nauvoo", location: "Nauvoo, IL", state: "IL", lat: 40.550, lng: -91.385 },
+        { name: "Carthage Jail", location: "Carthage, IL", state: "IL", lat: 40.416, lng: -91.136 },
+        { name: "Independence", location: "Independence, MO", state: "MO", lat: 39.092, lng: -94.416 },
+        { name: "Liberty Jail", location: "Independence, MO", state: "MO", lat: 39.246, lng: -94.419 },
+        { name: "Far West", location: "Far West, MO", state: "MO", lat: 39.956, lng: -94.143 },
+        { name: "Adam-ondi-Ahman", location: "Daviess County, MO", state: "MO", lat: 39.987, lng: -93.985 },
+        { name: "Winter Quarters", location: "Omaha, NE", state: "NE", lat: 41.306, lng: -95.998 },
+        { name: "Pioneer Handcart Site", location: "Martin's Cove, WY", state: "WY", lat: 42.444, lng: -107.231 },
+        { name: "This Is the Place Monument", location: "Salt Lake City, UT", state: "UT", lat: 40.754, lng: -111.817 }
+      ];
 
       const templeLocations = [
         { name: "Laie Hawaii Temple", city: "Laie", state: "HI", lat: 21.654, lng: -157.921 },
@@ -1385,6 +1421,7 @@
       const npsLayer = L.layerGroup().addTo(map);
       const statesLayer = L.layerGroup().addTo(map);
       const templeLayer = L.layerGroup().addTo(map);
+      const churchLayer = L.layerGroup().addTo(map);
       const markersByName = new Map();
       const search = document.getElementById("search");
       const filters = document.getElementById("stateFilters");
@@ -1401,6 +1438,7 @@
       const npsProgress = document.getElementById("npsProgress");
       const statesProgress = document.getElementById("statesProgress");
       const templeProgress = document.getElementById("templeProgress");
+      const churchProgress = document.getElementById("churchProgress");
       const toggleAllCategoriesButtons = [...document.querySelectorAll("[data-toggle-all-categories]")];
       const categoryTabButtons = [...document.querySelectorAll("[data-category-tab]")];
       const categoryPanels = [...document.querySelectorAll("[data-category-panel]")];
@@ -1421,6 +1459,10 @@
 
       function saveTempleComplete() {
         localStorage.setItem(templeCompleteKey, JSON.stringify([...templeComplete]));
+      }
+
+      function saveChurchHistoryVisited() {
+        localStorage.setItem(churchHistoryVisitedKey, JSON.stringify([...churchHistoryVisited]));
       }
 
       function savePlaceMemories() {
@@ -1478,6 +1520,24 @@
           photoInput: findMemoryControl("[data-place-photo]", "placePhoto"),
           photoPreview: findMemoryControl("[data-place-photo-preview]", "placePhotoPreview")
         };
+      }
+
+      function hydratePlaceMemoryControls(popup, placeKey) {
+        if (!popup) return;
+        const { noteField, wordCount, photoPreview } = getPlaceMemoryControls(popup, placeKey);
+        const memory = placeMemories[placeKey] || {};
+        const note = limitWords(memory.note || "");
+        if (noteField && noteField.value !== note) noteField.value = note;
+        if (wordCount) wordCount.textContent = `${countWords(note)}/200 words`;
+        if (photoPreview) {
+          if (memory.photo) {
+            photoPreview.src = memory.photo;
+            photoPreview.hidden = false;
+          } else {
+            photoPreview.src = "";
+            photoPreview.hidden = true;
+          }
+        }
       }
 
       function capturePlaceNoteFromPopup(popup, placeKey) {
@@ -1560,6 +1620,7 @@
       }
 
       function bindPlaceMemoryControls(popup, placeKey) {
+        hydratePlaceMemoryControls(popup, placeKey);
         const { noteField, wordCount, saveNoteButton, photoInput, photoPreview } = getPlaceMemoryControls(popup, placeKey);
 
         if (noteField) {
@@ -1721,6 +1782,17 @@
         return matchesSearch && matchesStateChip(temple.state) && matchesVisited;
       }
 
+      function matchesChurchFilters(site) {
+        const term = searchTerm.trim().toLowerCase();
+        const matchesSearch =
+          !term ||
+          site.name.toLowerCase().includes(term) ||
+          site.location.toLowerCase().includes(term) ||
+          (stateNames[site.state] || site.state).toLowerCase().includes(term);
+        const matchesVisited = !showVisitedOnly || churchHistoryVisited.has(site.name);
+        return matchesSearch && matchesStateChip(site.state) && matchesVisited;
+      }
+
       function withoutVisitedOnly(callback) {
         const previous = showVisitedOnly;
         showVisitedOnly = false;
@@ -1779,6 +1851,20 @@
             <div class="muted">${temple.city}, ${temple.state}</div>
             <div class="muted">LDS temple · ${status}</div>
             <button data-temple-complete="${temple.name}">${complete ? "Undo complete" : "Mark complete"}</button>
+            ${placeMemoryMarkup(placeKey)}
+          </div>
+        `;
+      }
+
+      function churchPopupMarkup(site) {
+        const isVisited = churchHistoryVisited.has(site.name);
+        const placeKey = `church:${site.name}`;
+        return `
+          <div class="popup">
+            <strong>${site.name}</strong>
+            <div class="muted">${site.location}</div>
+            <div class="muted">Church history site</div>
+            <button data-church-visited="${site.name}">${isVisited ? "Uncheck visited" : "Mark visited"}</button>
             ${placeMemoryMarkup(placeKey)}
           </div>
         `;
@@ -1862,6 +1948,10 @@
         return templeLocations.filter(matchesTempleFilters).length;
       }
 
+      function countFilteredChurchSites() {
+        return churchHistoryLocations.filter(matchesChurchFilters).length;
+      }
+
       function toggleVisited(parkName) {
         const unit = allUnits.find((item) => item.name === parkName);
         if (!unit) return;
@@ -1896,11 +1986,13 @@
         const filteredSites = withoutVisitedOnly(() => allUnits.filter((park) => park.type === "site" && matchesFilters(park)));
         const filteredStates = withoutVisitedOnly(() => stateLocations.filter(matchesStateLocationFilters));
         const filteredTemples = withoutVisitedOnly(() => templeLocations.filter(matchesTempleFilters));
+        const filteredChurchSites = withoutVisitedOnly(() => churchHistoryLocations.filter(matchesChurchFilters));
         const hideProgressNumbers = showVisitedOnly && allCategoriesAreOn();
         parksProgress.innerHTML = progressMarkup(filteredParks.filter((park) => visited.has(park.name)).length, filteredParks.length, "visited", hideProgressNumbers);
         npsProgress.innerHTML = progressMarkup(filteredSites.filter((site) => visitedSites.has(site.name)).length, filteredSites.length, "visited", hideProgressNumbers);
         statesProgress.innerHTML = progressMarkup(filteredStates.filter((state) => statesVisited.has(state.name)).length, filteredStates.length, "visited", hideProgressNumbers);
         templeProgress.innerHTML = progressMarkup(filteredTemples.filter((temple) => templeComplete.has(temple.name)).length, filteredTemples.length, "complete", hideProgressNumbers);
+        churchProgress.innerHTML = progressMarkup(filteredChurchSites.filter((site) => churchHistoryVisited.has(site.name)).length, filteredChurchSites.length, "visited", hideProgressNumbers);
       }
 
       function renderCategoryTabs() {
@@ -1918,7 +2010,7 @@
       }
 
       function allCategoriesAreOn() {
-        return showParksOnMap && showNpsOnMap && showStatesOnMap && showTemplesOnMap;
+        return showParksOnMap && showNpsOnMap && showStatesOnMap && showTemplesOnMap && showChurchOnMap;
       }
 
       function setAllCategoriesOnMap(visible) {
@@ -1926,6 +2018,7 @@
         showNpsOnMap = visible;
         showStatesOnMap = visible;
         showTemplesOnMap = visible;
+        showChurchOnMap = visible;
       }
 
       function categoryIsOnMap(category) {
@@ -1933,6 +2026,7 @@
         if (category === "nps") return showNpsOnMap;
         if (category === "states") return showStatesOnMap;
         if (category === "temples") return showTemplesOnMap;
+        if (category === "church") return showChurchOnMap;
         return false;
       }
 
@@ -1941,6 +2035,7 @@
         if (category === "nps") showNpsOnMap = !showNpsOnMap;
         if (category === "states") showStatesOnMap = !showStatesOnMap;
         if (category === "temples") showTemplesOnMap = !showTemplesOnMap;
+        if (category === "church") showChurchOnMap = !showChurchOnMap;
       }
 
       function renderMarkers(filtered) {
@@ -2083,6 +2178,44 @@
         });
       }
 
+      function toggleChurchHistoryVisited(siteName) {
+        if (churchHistoryVisited.has(siteName)) churchHistoryVisited.delete(siteName);
+        else churchHistoryVisited.add(siteName);
+        saveChurchHistoryVisited();
+        render();
+        const markerAgain = markersByName.get(siteName);
+        if (markerAgain) markerAgain.openPopup();
+      }
+
+      function renderChurchMarkers() {
+        churchLayer.clearLayers();
+        if (!showChurchOnMap) return;
+        churchHistoryLocations.filter(matchesChurchFilters).forEach((site) => {
+          const isVisited = churchHistoryVisited.has(site.name);
+          const color = "#6f245f";
+          const marker = L.circleMarker([site.lat, site.lng], {
+            radius: 8,
+            color,
+            weight: isVisited ? 1.4 : 2,
+            fillColor: isVisited ? "#f0d7e9" : color,
+            fillOpacity: isVisited ? 0.78 : 0.9
+          }).addTo(churchLayer);
+          markersByName.set(site.name, marker);
+          marker.bindPopup(churchPopupMarkup(site), popupOptions);
+          marker.on("popupopen", (event) => {
+            makePopupDraggable(event.popup);
+            const popup = event.popup.getElement();
+            if (!popup) return;
+            const visitedButton = popup.querySelector(`[data-church-visited="${CSS.escape(site.name)}"]`);
+            bindPlaceMemoryControls(popup, `church:${site.name}`);
+            if (visitedButton) visitedButton.onclick = () => toggleChurchHistoryVisited(site.name);
+          });
+          marker.on("popupclose", (event) => {
+            queuePlaceMemorySave(event.popup.getElement(), `church:${site.name}`);
+          });
+        });
+      }
+
       function render() {
         renderFilters();
         const filteredParks = parks.filter(matchesFilters);
@@ -2091,6 +2224,7 @@
         renderNpsMarkers(filteredSites);
         renderStateMarkers();
         renderTempleMarkers();
+        renderChurchMarkers();
         renderCategoryTabs();
         toggleAllCategoriesButtons.forEach((button) => {
           button.textContent = allCategoriesAreOn() ? "All off" : "All on";

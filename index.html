@@ -530,6 +530,296 @@
         flex: 0 0 auto;
       }
 
+      .checklist-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 1300;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 18px;
+        background: rgba(23, 34, 35, 0.48);
+        backdrop-filter: blur(8px);
+      }
+
+      .checklist-overlay.open {
+        display: flex;
+      }
+
+      .checklist-modal {
+        width: min(940px, 100%);
+        max-height: min(92vh, 900px);
+        display: grid;
+        grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+        overflow: hidden;
+        padding: 22px;
+        border-radius: 30px;
+        background: rgba(255, 250, 241, 0.98);
+        border: 1px solid rgba(255, 255, 255, 0.78);
+        box-shadow: var(--shadow);
+      }
+
+      .checklist-modal-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 14px;
+      }
+
+      .checklist-modal h2 {
+        margin: 2px 0 6px;
+        font-family: "Outfit", "Manrope", sans-serif;
+        font-size: clamp(1.6rem, 3vw, 2.25rem);
+        letter-spacing: -0.045em;
+      }
+
+      .checklist-close {
+        flex: 0 0 auto;
+        width: 38px;
+        height: 38px;
+        border: 0;
+        border-radius: 999px;
+        background: rgba(23, 34, 35, 0.08);
+        color: var(--ink);
+        cursor: pointer;
+        font-size: 1.35rem;
+        font-weight: 900;
+        line-height: 1;
+      }
+
+      .checklist-steps {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 7px;
+        margin: 18px 0 14px;
+      }
+
+      .checklist-step-button {
+        min-width: 0;
+        border: 1px solid rgba(23, 34, 35, 0.11);
+        border-radius: 14px;
+        padding: 10px 8px;
+        background: rgba(255, 255, 255, 0.72);
+        color: var(--text);
+        cursor: pointer;
+        font: inherit;
+        font-size: 0.76rem;
+        font-weight: 800;
+        line-height: 1.15;
+        transition: transform 150ms ease, box-shadow 150ms ease, background 150ms ease;
+      }
+
+      .checklist-step-button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 16px rgba(26, 36, 33, 0.08);
+      }
+
+      .checklist-step-button.active {
+        background: var(--green-deep);
+        color: white;
+        border-color: var(--green-deep);
+        box-shadow: 0 10px 20px rgba(23, 75, 55, 0.2);
+      }
+
+      .checklist-step-button.complete {
+        box-shadow: inset 0 0 0 2px rgba(44, 120, 80, 0.16);
+      }
+
+      .checklist-step-count {
+        display: block;
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 0.7rem;
+        font-weight: 700;
+      }
+
+      .checklist-step-button.active .checklist-step-count {
+        color: rgba(255, 255, 255, 0.78);
+      }
+
+      .checklist-toolbar {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(190px, 0.42fr);
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+
+      .checklist-toolbar select {
+        width: 100%;
+        min-width: 0;
+        padding: 13px 14px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.92);
+        color: var(--text);
+        font: inherit;
+        outline: none;
+      }
+
+      .checklist-toolbar select:focus {
+        border-color: rgba(44, 120, 80, 0.48);
+        box-shadow: 0 0 0 4px rgba(44, 120, 80, 0.12);
+      }
+
+      .checklist-list {
+        flex: 1 1 auto;
+        min-height: 170px;
+        max-height: min(49vh, 470px);
+        overflow: auto;
+        padding: 2px 4px 76px 0;
+        scroll-padding-bottom: 76px;
+      }
+
+      .checklist-content {
+        display: flex;
+        min-height: 0;
+        flex-direction: column;
+      }
+
+      .checklist-item {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 12px;
+        margin-top: 8px;
+        padding: 12px 14px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.78);
+        cursor: pointer;
+        transition: transform 150ms ease, border-color 150ms ease, background 150ms ease;
+      }
+
+      .checklist-item:hover {
+        transform: translateY(-1px);
+        border-color: rgba(44, 120, 80, 0.38);
+      }
+
+      .checklist-item.checked {
+        background: rgba(44, 120, 80, 0.11);
+        border-color: rgba(44, 120, 80, 0.38);
+      }
+
+      .checklist-item input {
+        width: 21px;
+        height: 21px;
+        accent-color: var(--green);
+        cursor: pointer;
+      }
+
+      .checklist-item strong {
+        display: block;
+        font-size: 0.96rem;
+        line-height: 1.25;
+      }
+
+      .checklist-item-meta {
+        display: block;
+        margin-top: 3px;
+        color: var(--muted);
+        font-size: 0.78rem;
+        line-height: 1.35;
+      }
+
+      .checklist-checkmark {
+        display: grid;
+        place-items: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 999px;
+        background: rgba(23, 34, 35, 0.08);
+        color: transparent;
+        font-weight: 900;
+      }
+
+      .checklist-item.checked .checklist-checkmark {
+        background: var(--green);
+        color: white;
+      }
+
+      .checklist-empty,
+      .checklist-loading,
+      .checklist-error {
+        display: grid;
+        place-items: center;
+        min-height: 150px;
+        padding: 28px;
+        border: 1px dashed rgba(23, 34, 35, 0.18);
+        border-radius: 18px;
+        color: var(--muted);
+        text-align: center;
+      }
+
+      .checklist-error {
+        gap: 10px;
+        color: #8c3327;
+        background: rgba(189, 73, 54, 0.07);
+      }
+
+      .checklist-error .button {
+        background: #fff;
+        color: var(--red);
+        border: 1px solid rgba(189, 73, 54, 0.25);
+      }
+
+      .checklist-count-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 4px;
+        color: var(--muted);
+        font-size: 0.8rem;
+        font-weight: 800;
+      }
+
+      .checklist-save-status {
+        min-height: 1.1rem;
+        margin-top: 10px;
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+
+      .checklist-save-status.error {
+        color: #8c3327;
+      }
+
+      .checklist-save-status button {
+        margin-left: 6px;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: inherit;
+        cursor: pointer;
+        font: inherit;
+        font-weight: 900;
+        text-decoration: underline;
+      }
+
+      .checklist-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-top: 14px;
+        padding-top: 14px;
+        border-top: 1px solid var(--line);
+      }
+
+      .checklist-footer-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+
+      .checklist-footer .button:disabled {
+        cursor: not-allowed;
+        opacity: 0.48;
+        transform: none;
+        box-shadow: none;
+      }
+
       .category-tabs {
         display: grid;
         gap: 10px;
@@ -671,6 +961,12 @@
         gap: 8px;
         flex-wrap: wrap;
         justify-content: space-between;
+      }
+
+      .category-controls .checklist-launcher {
+        background: rgba(255, 255, 255, 0.84);
+        color: var(--green-deep);
+        border: 1px solid rgba(44, 120, 80, 0.2);
       }
 
       .toggle-row {
@@ -914,6 +1210,53 @@
           max-height: none;
         }
       }
+
+      @media (max-width: 640px) {
+        .checklist-overlay {
+          align-items: stretch;
+          padding: 8px;
+        }
+
+        .checklist-modal {
+          height: 100%;
+          max-height: none;
+          min-height: 0;
+          padding: 16px;
+          border-radius: 24px;
+        }
+
+        .checklist-steps {
+          display: flex;
+          overflow-x: auto;
+          padding: 2px 1px 4px;
+        }
+
+        .checklist-step-button {
+          flex: 0 0 126px;
+        }
+
+        .checklist-toolbar {
+          grid-template-columns: 1fr;
+        }
+
+        .checklist-list {
+          min-height: 0;
+          max-height: none;
+        }
+
+        .checklist-footer {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        .checklist-footer-actions {
+          justify-content: stretch;
+        }
+
+        .checklist-footer-actions .button {
+          flex: 1 1 auto;
+        }
+      }
     </style>
   </head>
   <body>
@@ -921,7 +1264,7 @@
       <aside class="sidebar">
         <div class="brand-lockup">
           <div class="brand-mark" aria-hidden="true"></div>
-          <div>
+          <div class="checklist-content">
             <h1>Journey<span class="wordmark-accent">Pins</span></h1>
             <div class="tagline">Pin every place that matters!</div>
             <div class="subtitle">
@@ -964,6 +1307,7 @@
             <div class="category-panel active" data-category-panel="parks">
               <div class="category-tab">
                 <div class="category-controls">
+                  <button class="button checklist-launcher" data-checklist-open="parks">Checklist</button>
                   <button class="button brand-all" data-toggle-all-categories>All off</button>
                 </div>
                 <div class="progress-card" id="parksProgress"></div>
@@ -972,6 +1316,7 @@
             <div class="category-panel" data-category-panel="nps">
               <div class="category-tab">
                 <div class="category-controls">
+                  <button class="button checklist-launcher" data-checklist-open="nps">Checklist</button>
                   <button class="button brand-all" data-toggle-all-categories>All off</button>
                 </div>
                 <div class="progress-card" id="npsProgress"></div>
@@ -980,6 +1325,7 @@
             <div class="category-panel" data-category-panel="states">
               <div class="category-tab">
                 <div class="category-controls">
+                  <button class="button checklist-launcher" data-checklist-open="states">Checklist</button>
                   <button class="button brand-all" data-toggle-all-categories>All off</button>
                 </div>
                 <div class="progress-card" id="statesProgress"></div>
@@ -988,6 +1334,7 @@
             <div class="category-panel" data-category-panel="temples">
               <div class="category-tab">
                 <div class="category-controls">
+                  <button class="button checklist-launcher" data-checklist-open="temples">Checklist</button>
                   <button class="button brand-all" data-toggle-all-categories>All off</button>
                 </div>
                 <div class="progress-card" id="templeProgress"></div>
@@ -996,6 +1343,7 @@
             <div class="category-panel" data-category-panel="church">
               <div class="category-tab">
                 <div class="category-controls">
+                  <button class="button checklist-launcher" data-checklist-open="church">Checklist</button>
                   <button class="button brand-all" data-toggle-all-categories>All off</button>
                 </div>
                 <div class="progress-card" id="churchProgress"></div>
@@ -1047,6 +1395,45 @@
         </div>
         <input id="search" class="search" type="search" placeholder="Filter parks, states, or temples" style="margin-top:14px;" />
         <div id="stateFilters" class="filters"></div>
+      </div>
+    </div>
+
+    <div id="checklistOverlay" class="checklist-overlay" aria-hidden="true">
+      <div class="checklist-modal" role="dialog" aria-modal="true" aria-labelledby="checklistTitle" aria-describedby="checklistDescription">
+        <div class="checklist-modal-head">
+          <div>
+            <div class="summary" id="checklistKicker">Visited places</div>
+            <h2 id="checklistTitle">Build your JourneyPins checklist</h2>
+            <div id="checklistDescription" class="help">Check the places you have already visited. Your changes save as you go.</div>
+          </div>
+          <button id="closeChecklist" class="checklist-close" type="button" aria-label="Close checklist">&times;</button>
+        </div>
+
+        <div id="checklistSteps" class="checklist-steps" aria-label="Checklist categories"></div>
+
+        <div class="checklist-toolbar">
+          <input id="checklistSearch" class="search" type="search" placeholder="Search this category" autocomplete="off" />
+          <select id="checklistStateFilter" aria-label="Filter checklist by state"></select>
+        </div>
+
+        <div>
+          <div class="checklist-count-row">
+            <span id="checklistCategoryLabel">National Parks</span>
+            <span id="checklistCount">0 of 0 checked</span>
+          </div>
+          <div id="checklistList" class="checklist-list" aria-live="polite"></div>
+        </div>
+
+        <div>
+          <div id="checklistSaveStatus" class="checklist-save-status" role="status" aria-live="polite"></div>
+          <div class="checklist-footer">
+            <button id="checklistSkip" class="button secondary" type="button">Skip for now</button>
+            <div class="checklist-footer-actions">
+              <button id="checklistBack" class="button secondary" type="button">Back</button>
+              <button id="checklistNext" class="button primary" type="button">Next</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1151,6 +1538,7 @@
       let searchTerm = "";
       let allUnits = parks.slice();
       let loadError = "";
+      let npsDataState = "loading";
       let showParksOnMap = true;
       let showNpsOnMap = false;
       let showStatesOnMap = false;
@@ -1450,6 +1838,278 @@
         return !templeStatusByName.has(temple.name);
       }
 
+      const checklistCategories = [
+        {
+          id: "parks",
+          label: "National Parks",
+          actionLabel: "visited",
+          getItems: () => parks,
+          getSet: () => visited,
+          getStates: (item) => item.states || [],
+          getMeta: (item) => (item.states || []).map((state) => stateNames[state] || state).join(", ")
+        },
+        {
+          id: "nps",
+          label: "NPS Sites",
+          actionLabel: "visited",
+          getItems: () => allUnits.filter((item) => item.type === "site"),
+          getSet: () => visitedSites,
+          getStates: (item) => item.states || [],
+          getMeta: (item) => (item.states || []).map((state) => stateNames[state] || state).join(", ")
+        },
+        {
+          id: "states",
+          label: "50 States",
+          actionLabel: "visited",
+          getItems: () => stateLocations,
+          getSet: () => statesVisited,
+          getStates: (item) => [item.abbr],
+          getMeta: (item) => item.abbr
+        },
+        {
+          id: "temples",
+          label: "Temples",
+          actionLabel: "complete",
+          getItems: () => templeLocations.filter(templeIsOpen),
+          getSet: () => templeComplete,
+          getStates: (item) => [item.state],
+          getMeta: (item) => `${item.city}, ${stateNames[item.state] || item.state}`
+        },
+        {
+          id: "church",
+          label: "Church History",
+          actionLabel: "visited",
+          getItems: () => churchHistoryLocations,
+          getSet: () => churchHistoryVisited,
+          getStates: (item) => [item.state],
+          getMeta: (item) => item.location
+        }
+      ];
+      const checklistCategoryById = new Map(checklistCategories.map((category) => [category.id, category]));
+
+      function checklistCategoryItems(category) {
+        return category.getItems().slice().sort((a, b) => String(a.name || "").localeCompare(String(b.name || "")));
+      }
+
+      function checklistStatesForItems(category, items) {
+        return [...new Set(items.flatMap((item) => category.getStates(item)).filter(Boolean))]
+          .sort((a, b) => (stateNames[a] || a).localeCompare(stateNames[b] || b));
+      }
+
+      function checklistSearchText(category, item) {
+        const states = category.getStates(item).map((state) => stateNames[state] || state).join(" ");
+        const meta = category.getMeta(item) || "";
+        return `${item.name || ""} ${states} ${meta}`.toLowerCase();
+      }
+
+      function checklistCategoryProgress(category) {
+        const items = checklistCategoryItems(category);
+        const selected = category.getSet();
+        return {
+          total: items.length,
+          done: items.filter((item) => selected.has(item.name)).length
+        };
+      }
+
+      function updateChecklistSaveStatus() {
+        if (!checklistSaveStatus) return;
+        checklistSaveStatus.classList.toggle("error", checklistSaveState === "error");
+        if (checklistSaveState === "saving") {
+          checklistSaveStatus.textContent = "Saving your checks...";
+        } else if (checklistSaveState === "saved") {
+          checklistSaveStatus.textContent = "Saved to your account.";
+        } else if (checklistSaveState === "error") {
+          checklistSaveStatus.innerHTML = "Could not save your latest changes. <button type=\"button\" data-checklist-retry-save>Retry</button>";
+        } else {
+          checklistSaveStatus.textContent = "Changes save automatically.";
+        }
+      }
+
+      function setChecklistSaveState(state) {
+        checklistSaveState = state;
+        updateChecklistSaveStatus();
+      }
+
+      function renderChecklist() {
+        if (!checklistModalOpen) return;
+        const category = checklistCategories[checklistStepIndex] || checklistCategories[0];
+        const previousScrollTop = checklistList.scrollTop;
+        const searchWasFocused = document.activeElement === checklistSearch;
+        const progressById = new Map(checklistCategories.map((entry) => [entry.id, checklistCategoryProgress(entry)]));
+
+        checklistKicker.textContent = checklistMode === "onboarding" ? "First-time setup" : "Visited places";
+        checklistTitle.textContent = checklistMode === "onboarding" ? "Build your JourneyPins checklist" : "Update your JourneyPins checklist";
+        checklistDescription.textContent = checklistMode === "onboarding"
+          ? "Check the places you have already visited. Your changes save as you go."
+          : "Update one state or attraction at a time. Your changes save as you go.";
+        checklistCategoryLabel.textContent = category.label;
+
+        checklistSteps.innerHTML = checklistCategories.map((entry, index) => {
+          const progress = progressById.get(entry.id);
+          const active = index === checklistStepIndex;
+          const complete = progress.total > 0 && progress.done === progress.total;
+          const isLoading = entry.id === "nps" && npsDataState === "loading";
+          const count = isLoading ? "Loading..." : `${progress.done}/${progress.total}`;
+          return `
+            <button class="checklist-step-button${active ? " active" : ""}${complete ? " complete" : ""}" type="button" data-checklist-step="${entry.id}" aria-current="${active ? "step" : "false"}">
+              ${escapeHtml(entry.label)}
+              <span class="checklist-step-count">${count}</span>
+            </button>
+          `;
+        }).join("");
+
+        checklistSearch.value = checklistSearchTerm;
+        const allItems = checklistCategoryItems(category);
+        const canFilterByState = category.id !== "states";
+        const availableStates = checklistStatesForItems(category, allItems);
+        checklistStateFilter.hidden = !canFilterByState;
+        checklistStateFilter.disabled = !canFilterByState;
+        if (canFilterByState) {
+          if (checklistStateCode && !availableStates.includes(checklistStateCode)) checklistStateCode = "";
+          checklistStateFilter.innerHTML = `<option value="">All states</option>${availableStates.map((state) => `<option value="${escapeHtml(state)}">${escapeHtml(stateNames[state] || state)}</option>`).join("")}`;
+          checklistStateFilter.value = checklistStateCode;
+        } else {
+          checklistStateCode = "";
+          checklistStateFilter.innerHTML = "<option value=\"\">All states</option>";
+        }
+
+        if (category.id === "nps" && npsDataState === "loading") {
+          checklistCount.textContent = "Loading list...";
+          checklistList.innerHTML = `<div class="checklist-loading">Loading NPS sites from the National Park Service...</div>`;
+        } else if (category.id === "nps" && npsDataState === "error") {
+          checklistCount.textContent = "List unavailable";
+          checklistList.innerHTML = `<div class="checklist-error"><div>We couldn't load the NPS site list right now.</div><button class="button" type="button" data-checklist-retry-nps>Retry NPS list</button></div>`;
+        } else {
+          const normalizedSearch = checklistSearchTerm.trim().toLowerCase();
+          const filteredItems = allItems.filter((item) => {
+            const matchesSearch = !normalizedSearch || checklistSearchText(category, item).includes(normalizedSearch);
+            const matchesState = !checklistStateCode || category.getStates(item).includes(checklistStateCode);
+            return matchesSearch && matchesState;
+          });
+          const selected = category.getSet();
+          const progress = progressById.get(category.id);
+          checklistCount.textContent = `${progress.done} of ${progress.total} checked${filteredItems.length !== allItems.length ? ` · ${filteredItems.length} shown` : ""}`;
+          if (!filteredItems.length) {
+            checklistList.innerHTML = `<div class="checklist-empty">No places match this search and state filter.</div>`;
+          } else {
+            checklistList.innerHTML = filteredItems.map((item) => {
+              const name = String(item.name || "");
+              const checked = selected.has(name);
+              const meta = category.getMeta(item);
+              return `
+                <label class="checklist-item${checked ? " checked" : ""}">
+                  <input type="checkbox" data-checklist-category="${category.id}" data-checklist-item="${escapeHtml(name)}"${checked ? " checked" : ""}>
+                  <span>
+                    <strong>${escapeHtml(name)}</strong>
+                    <span class="checklist-item-meta">${escapeHtml(meta || category.label)}</span>
+                  </span>
+                  <span class="checklist-checkmark" aria-hidden="true">✓</span>
+                </label>
+              `;
+            }).join("");
+          }
+        }
+
+        checklistBackButton.disabled = checklistStepIndex === 0;
+        checklistNextButton.textContent = checklistStepIndex === checklistCategories.length - 1 ? "Done" : "Next";
+        checklistSkipButton.textContent = checklistMode === "onboarding" ? "Skip for now" : "Close";
+        checklistList.scrollTop = previousScrollTop;
+        updateChecklistSaveStatus();
+        if (searchWasFocused) {
+          checklistSearch.focus();
+          checklistSearch.setSelectionRange(checklistSearch.value.length, checklistSearch.value.length);
+        }
+      }
+
+      function hideChecklist(restoreFocus = true) {
+        checklistModalOpen = false;
+        checklistOverlay.classList.remove("open");
+        checklistOverlay.setAttribute("aria-hidden", "true");
+        if (restoreFocus && checklistLastFocus && typeof checklistLastFocus.focus === "function") checklistLastFocus.focus();
+        checklistLastFocus = null;
+      }
+
+      function openChecklist(categoryId = activeCategory, options = {}) {
+        if (!requireAuthenticatedUser()) return;
+        const requestedIndex = checklistCategories.findIndex((category) => category.id === categoryId);
+        checklistStepIndex = requestedIndex >= 0 ? requestedIndex : 0;
+        checklistMode = options.onboarding ? "onboarding" : "manual";
+        checklistSearchTerm = "";
+        checklistStateCode = "";
+        checklistLastFocus = document.activeElement;
+        checklistModalOpen = true;
+        checklistOverlay.classList.add("open");
+        checklistOverlay.setAttribute("aria-hidden", "false");
+        renderChecklist();
+        window.setTimeout(() => checklistSearch.focus(), 0);
+      }
+
+      async function persistChecklistSeenAndClose() {
+        if (!currentUser) {
+          hideChecklist();
+          return;
+        }
+        checklistOnboardingSeen = true;
+        window.clearTimeout(progressSaveTimer);
+        progressSaveTimer = 0;
+        setChecklistSaveState("saving");
+        try {
+          await saveProgressToSupabase();
+          hideChecklist();
+        } catch (error) {
+          console.warn("Could not save checklist setup state", error);
+          renderChecklist();
+        }
+      }
+
+      function dismissChecklist() {
+        if (checklistMode === "onboarding" && !checklistOnboardingSeen) {
+          persistChecklistSeenAndClose();
+        } else {
+          hideChecklist();
+        }
+      }
+
+      function moveChecklistStep(step) {
+        checklistStepIndex = Math.max(0, Math.min(checklistCategories.length - 1, checklistStepIndex + step));
+        checklistSearchTerm = "";
+        checklistStateCode = "";
+        renderChecklist();
+        window.setTimeout(() => checklistSearch.focus(), 0);
+      }
+
+      function finishChecklist() {
+        if (checklistStepIndex < checklistCategories.length - 1) {
+          moveChecklistStep(1);
+          return;
+        }
+        persistChecklistSeenAndClose();
+      }
+
+      async function retryNpsChecklist() {
+        npsDataState = "loading";
+        renderChecklist();
+        try {
+          const apiKey = await loadApiKeyFromEnv();
+          await loadNpsData(apiKey);
+        } catch (error) {
+          console.warn("Could not retry NPS data", error);
+        }
+      }
+
+      function retryChecklistSave() {
+        if (!currentUser) return;
+        window.clearTimeout(progressSaveTimer);
+        progressSaveTimer = 0;
+        saveProgressToSupabase().catch((error) => {
+          console.warn("Could not retry checklist save", error);
+        });
+      }
+
+      function maybeOpenChecklistOnboarding() {
+        if (currentUser && !checklistOnboardingSeen && !checklistModalOpen) openChecklist("parks", { onboarding: true });
+      }
+
       const lower48Bounds = L.latLngBounds(
         L.latLng(24.0, -125.0),
         L.latLng(50.0, -66.0)
@@ -1533,6 +2193,22 @@
       const authStatus = document.getElementById("authStatus");
       const mapQuote = document.getElementById("mapQuote");
       const closeMapQuote = document.getElementById("closeMapQuote");
+      const checklistOverlay = document.getElementById("checklistOverlay");
+      const checklistModal = checklistOverlay.querySelector(".checklist-modal");
+      const checklistKicker = document.getElementById("checklistKicker");
+      const checklistTitle = document.getElementById("checklistTitle");
+      const checklistDescription = document.getElementById("checklistDescription");
+      const checklistSteps = document.getElementById("checklistSteps");
+      const checklistSearch = document.getElementById("checklistSearch");
+      const checklistStateFilter = document.getElementById("checklistStateFilter");
+      const checklistCategoryLabel = document.getElementById("checklistCategoryLabel");
+      const checklistCount = document.getElementById("checklistCount");
+      const checklistList = document.getElementById("checklistList");
+      const checklistSaveStatus = document.getElementById("checklistSaveStatus");
+      const closeChecklistButton = document.getElementById("closeChecklist");
+      const checklistSkipButton = document.getElementById("checklistSkip");
+      const checklistBackButton = document.getElementById("checklistBack");
+      const checklistNextButton = document.getElementById("checklistNext");
       const parksProgress = document.getElementById("parksProgress");
       const npsProgress = document.getElementById("npsProgress");
       const statesProgress = document.getElementById("statesProgress");
@@ -1547,6 +2223,14 @@
       let progressSaveTimer = 0;
       let progressSaveInFlight = Promise.resolve();
       let currentUser = null;
+      let checklistOnboardingSeen = false;
+      let checklistModalOpen = false;
+      let checklistMode = "onboarding";
+      let checklistStepIndex = 0;
+      let checklistSearchTerm = "";
+      let checklistStateCode = "";
+      let checklistSaveState = "idle";
+      let checklistLastFocus = null;
 
       function readStoredArray(key) {
         try {
@@ -1575,7 +2259,8 @@
           visited_states: readStoredArray(statesVisitedKey),
           completed_temples: readStoredArray(templeCompleteKey),
           visited_church_history: readStoredArray(churchHistoryVisitedKey),
-          place_memories: readStoredObject(placeMemoriesKey)
+          place_memories: readStoredObject(placeMemoriesKey),
+          checklist_onboarding_seen: false
         };
       }
 
@@ -1586,7 +2271,8 @@
           progress?.visited_states?.length ||
           progress?.completed_temples?.length ||
           progress?.visited_church_history?.length ||
-          Object.keys(progress?.place_memories || {}).length
+          Object.keys(progress?.place_memories || {}).length ||
+          progress?.checklist_onboarding_seen === true
         );
       }
 
@@ -1611,6 +2297,7 @@
         replaceSet(templeComplete, progress?.completed_temples);
         replaceSet(churchHistoryVisited, progress?.visited_church_history);
         replaceObject(placeMemories, progress?.place_memories);
+        checklistOnboardingSeen = Boolean(progress?.checklist_onboarding_seen);
       }
 
       function currentProgressPayload() {
@@ -1624,6 +2311,7 @@
           completed_temples: [...templeComplete],
           visited_church_history: [...churchHistoryVisited],
           place_memories: placeMemories,
+          checklist_onboarding_seen: checklistOnboardingSeen,
           updated_at: new Date().toISOString()
         };
       }
@@ -1641,11 +2329,17 @@
         if (!client) throw new Error("Supabase client is not available.");
         const payload = currentProgressPayload();
         progressSaveInFlight = progressSaveInFlight.catch(() => {}).then(async () => {
+          setChecklistSaveState("saving");
           const { error } = await client
             .from(progressTable)
             .upsert(payload, { onConflict: "profile_id" });
           if (error) throw error;
+          setChecklistSaveState("saved");
           return true;
+        });
+        progressSaveInFlight = progressSaveInFlight.catch((error) => {
+          setChecklistSaveState("error");
+          throw error;
         });
         return progressSaveInFlight;
       }
@@ -1656,6 +2350,7 @@
           return;
         }
         window.clearTimeout(progressSaveTimer);
+        setChecklistSaveState("saving");
         progressSaveTimer = window.setTimeout(() => {
           saveProgressToSupabase().catch((error) => {
             console.warn("Could not save progress to Supabase", error);
@@ -1678,7 +2373,7 @@
         try {
           const { data, error } = await client
             .from(progressTable)
-            .select("visited_parks, visited_sites, visited_states, completed_temples, visited_church_history, place_memories")
+            .select("visited_parks, visited_sites, visited_states, completed_temples, visited_church_history, place_memories, checklist_onboarding_seen")
             .eq("user_id", currentUser.id)
             .maybeSingle();
           if (error) throw error;
@@ -1718,6 +2413,8 @@
         renderAuth();
         await loadProgressFromSupabase();
         render();
+        if (!currentUser) hideChecklist(false);
+        else maybeOpenChecklistOnboarding();
       }
 
       async function handleSignIn() {
@@ -1770,6 +2467,7 @@
       async function handleSignOut() {
         const client = getProgressClient();
         if (!client) return;
+        if (checklistModalOpen) hideChecklist(false);
         signOutButton.disabled = true;
         setAuthStatus("Signing out...");
         try {
@@ -2580,6 +3278,7 @@
         visitedOnlyFilter.textContent = showVisitedOnly ? "Showing places I’ve been" : "Show only places I’ve been";
         visitedOnlyFilter.classList.toggle("active", showVisitedOnly);
         renderSummary();
+        renderChecklist();
       }
 
       search.addEventListener("input", (event) => {
@@ -2619,6 +3318,89 @@
       visitedOnlyFilter.addEventListener("click", () => {
         showVisitedOnly = !showVisitedOnly;
         render();
+      });
+
+      checklistSearch.addEventListener("input", (event) => {
+        checklistSearchTerm = event.target.value;
+        renderChecklist();
+      });
+
+      checklistStateFilter.addEventListener("change", (event) => {
+        checklistStateCode = event.target.value;
+        renderChecklist();
+      });
+
+      checklistList.addEventListener("change", (event) => {
+        const checkbox = event.target.closest?.("[data-checklist-item]");
+        if (!checkbox) return;
+        if (!requireAuthenticatedUser()) {
+          checkbox.checked = !checkbox.checked;
+          return;
+        }
+        const category = checklistCategoryById.get(checkbox.dataset.checklistCategory);
+        if (!category) return;
+        const selected = category.getSet();
+        if (checkbox.checked) selected.add(checkbox.dataset.checklistItem);
+        else selected.delete(checkbox.dataset.checklistItem);
+        render();
+        queueProgressSave();
+      });
+
+      checklistSteps.addEventListener("click", (event) => {
+        const stepButton = event.target.closest?.("[data-checklist-step]");
+        if (!stepButton) return;
+        const index = checklistCategories.findIndex((category) => category.id === stepButton.dataset.checklistStep);
+        if (index < 0) return;
+        checklistStepIndex = index;
+        checklistSearchTerm = "";
+        checklistStateCode = "";
+        renderChecklist();
+        window.setTimeout(() => checklistSearch.focus(), 0);
+      });
+
+      checklistList.addEventListener("click", (event) => {
+        const retryButton = event.target.closest?.("[data-checklist-retry-nps]");
+        if (retryButton) retryNpsChecklist();
+      });
+
+      checklistSaveStatus.addEventListener("click", (event) => {
+        if (event.target.closest?.("[data-checklist-retry-save]")) retryChecklistSave();
+      });
+
+      document.querySelectorAll("[data-checklist-open]").forEach((button) => {
+        button.addEventListener("click", () => {
+          openChecklist(button.dataset.checklistOpen || activeCategory);
+        });
+      });
+
+      closeChecklistButton.addEventListener("click", dismissChecklist);
+      checklistSkipButton.addEventListener("click", dismissChecklist);
+      checklistBackButton.addEventListener("click", () => moveChecklistStep(-1));
+      checklistNextButton.addEventListener("click", finishChecklist);
+      checklistOverlay.addEventListener("click", (event) => {
+        if (event.target === checklistOverlay) dismissChecklist();
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (!checklistModalOpen) return;
+        if (event.key === "Escape") {
+          event.preventDefault();
+          dismissChecklist();
+          return;
+        }
+        if (event.key !== "Tab") return;
+        const focusable = [...checklistModal.querySelectorAll("button:not([disabled]), input:not([disabled]), select:not([disabled])")]
+          .filter((element) => !element.hidden && element.offsetParent !== null);
+        if (!focusable.length) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
       });
 
       function canvasToBlob(canvas) {
@@ -2763,20 +3545,29 @@
       }
 
       async function loadNpsData(apiKey) {
-        const url = "https://developer.nps.gov/api/v1/parks?limit=500&fields=parkCode,fullName,designation,states,latLong";
-        const response = await fetch(url, {
-          headers: {
-            "X-Api-Key": apiKey
+        npsDataState = "loading";
+        renderChecklist();
+        try {
+          const url = "https://developer.nps.gov/api/v1/parks?limit=500&fields=parkCode,fullName,designation,states,latLong";
+          const response = await fetch(url, {
+            headers: {
+              "X-Api-Key": apiKey
+            }
+          });
+          if (!response.ok) {
+            throw new Error(`NPS API request failed: ${response.status}`);
           }
-        });
-        if (!response.ok) {
-          throw new Error(`NPS API request failed: ${response.status}`);
+          const data = await response.json();
+          const units = (data.data || []).map(normalizeUnit).filter(Boolean);
+          const sites = units.filter((unit) => unit.type === "site");
+          allUnits = parks.concat(sites);
+          npsDataState = "ready";
+          render();
+        } catch (error) {
+          npsDataState = "error";
+          render();
+          throw error;
         }
-        const data = await response.json();
-        const units = (data.data || []).map(normalizeUnit).filter(Boolean);
-        const sites = units.filter((unit) => unit.type === "site");
-        allUnits = parks.concat(sites);
-        render();
       }
 
       async function loadApiKeyFromEnv() {

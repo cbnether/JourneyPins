@@ -421,6 +421,67 @@
         font-size: 0.8rem;
       }
 
+      .auth-card {
+        display: grid;
+        gap: 10px;
+      }
+
+      .auth-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .auth-form {
+        display: grid;
+        gap: 8px;
+      }
+
+      .auth-form[hidden],
+      .auth-session[hidden] {
+        display: none;
+      }
+
+      .auth-input {
+        width: 100%;
+        padding: 11px 12px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.92);
+        font: inherit;
+        outline: none;
+      }
+
+      .auth-input:focus {
+        border-color: rgba(44, 120, 80, 0.48);
+        box-shadow: 0 0 0 4px rgba(44, 120, 80, 0.12);
+      }
+
+      .auth-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .auth-session {
+        display: grid;
+        gap: 8px;
+      }
+
+      .auth-user {
+        color: var(--green-deep);
+        font-size: 0.88rem;
+        font-weight: 800;
+        overflow-wrap: anywhere;
+      }
+
+      .auth-status {
+        min-height: 1rem;
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+
       .filter-overlay {
         position: fixed;
         inset: 0;
@@ -657,8 +718,8 @@
         position: absolute;
         left: 50%;
         right: auto;
-        bottom: 220px;
-        transform: translateX(-50%);
+        top: 50%;
+        transform: translate(-50%, -50%);
         z-index: 500;
         max-width: min(680px, calc(100% - 68px));
         padding: 24px 32px;
@@ -865,6 +926,27 @@
           </div>
         </div>
 
+        <div class="card auth-card">
+          <div class="auth-head">
+            <div>
+              <div class="summary">Account</div>
+              <div id="authStatus" class="auth-status" aria-live="polite">Sign in to save your own pins.</div>
+            </div>
+          </div>
+          <form id="authForm" class="auth-form">
+            <input id="authEmail" class="auth-input" type="email" autocomplete="email" placeholder="Email" required />
+            <input id="authPassword" class="auth-input" type="password" autocomplete="current-password" placeholder="Password" required minlength="6" />
+            <div class="auth-row">
+              <button id="signInButton" class="button primary" type="submit">Sign in</button>
+              <button id="signUpButton" class="button secondary" type="button">Create account</button>
+            </div>
+          </form>
+          <div id="authSession" class="auth-session" hidden>
+            <div id="authUser" class="auth-user"></div>
+            <button id="signOutButton" class="button secondary" type="button">Sign out</button>
+          </div>
+        </div>
+
         <div class="card">
           <div class="summary">Categories</div>
           <div class="category-tab-row">
@@ -938,7 +1020,7 @@
       <main class="map-panel">
         <div id="map"></div>
         <div class="floating-note">
-          * The app saves your checkmarks on this device in your browser. Clear browser data and the progress resets.
+          * Sign in to save your checkmarks, notes, and photos in Supabase.
         </div>
         <div id="mapQuote" class="map-quote">
           <button id="closeMapQuote" class="quote-close" aria-label="Close quote">&times;</button>
@@ -964,6 +1046,7 @@
       </div>
     </div>
 
+      <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
       <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
       <script>
       const parks = [
@@ -1051,12 +1134,15 @@
       const churchHistoryVisitedKey = "npb-church-history-visited-v1";
       const placeMemoriesKey = "npb-place-memories-v1";
       const bundledNpsApiKey = "NHwal6BG71ikZNdXYqOQ0QR390ap0cTWhHO8XUtI";
-      const visited = new Set(JSON.parse(localStorage.getItem(storageKey) || "[]"));
-      const visitedSites = new Set(JSON.parse(localStorage.getItem(npsStorageKey) || "[]"));
-      const statesVisited = new Set(JSON.parse(localStorage.getItem(statesVisitedKey) || "[]"));
-      const templeComplete = new Set(JSON.parse(localStorage.getItem(templeCompleteKey) || "[]"));
-      const churchHistoryVisited = new Set(JSON.parse(localStorage.getItem(churchHistoryVisitedKey) || "[]"));
-      const placeMemories = JSON.parse(localStorage.getItem(placeMemoriesKey) || "{}");
+      const supabaseUrl = "https://qzdqzcvyxjaigygyjcqm.supabase.co";
+      const supabasePublishableKey = "sb_publishable_ZTdFfpOBirTUn_kql-dTJA_MLwZgIXj";
+      const progressTable = "journeypins_progress";
+      const visited = new Set();
+      const visitedSites = new Set();
+      const statesVisited = new Set();
+      const templeComplete = new Set();
+      const churchHistoryVisited = new Set();
+      const placeMemories = {};
       const stateFilter = new Set();
       let searchTerm = "";
       let allUnits = parks.slice();
@@ -1432,6 +1518,15 @@
       const visitedOnlyFilter = document.getElementById("visitedOnlyFilter");
       const shareStatus = document.getElementById("shareStatus");
       const shareScreenshotButton = document.getElementById("shareScreenshot");
+      const authForm = document.getElementById("authForm");
+      const authEmail = document.getElementById("authEmail");
+      const authPassword = document.getElementById("authPassword");
+      const signInButton = document.getElementById("signInButton");
+      const signUpButton = document.getElementById("signUpButton");
+      const signOutButton = document.getElementById("signOutButton");
+      const authSession = document.getElementById("authSession");
+      const authUser = document.getElementById("authUser");
+      const authStatus = document.getElementById("authStatus");
       const mapQuote = document.getElementById("mapQuote");
       const closeMapQuote = document.getElementById("closeMapQuote");
       const parksProgress = document.getElementById("parksProgress");
@@ -1444,30 +1539,269 @@
       const categoryPanels = [...document.querySelectorAll("[data-category-panel]")];
       let activeCategory = "parks";
       let showVisitedOnly = false;
+      let progressClient = null;
+      let progressSaveTimer = 0;
+      let progressSaveInFlight = Promise.resolve();
+      let currentUser = null;
+
+      function readStoredArray(key) {
+        try {
+          const value = JSON.parse(localStorage.getItem(key) || "[]");
+          return Array.isArray(value) ? value : [];
+        } catch (error) {
+          console.warn(`Could not read ${key}`, error);
+          return [];
+        }
+      }
+
+      function readStoredObject(key) {
+        try {
+          const value = JSON.parse(localStorage.getItem(key) || "{}");
+          return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+        } catch (error) {
+          console.warn(`Could not read ${key}`, error);
+          return {};
+        }
+      }
+
+      function legacyProgressFromBrowser() {
+        return {
+          visited_parks: readStoredArray(storageKey),
+          visited_sites: readStoredArray(npsStorageKey),
+          visited_states: readStoredArray(statesVisitedKey),
+          completed_temples: readStoredArray(templeCompleteKey),
+          visited_church_history: readStoredArray(churchHistoryVisitedKey),
+          place_memories: readStoredObject(placeMemoriesKey)
+        };
+      }
+
+      function progressHasData(progress) {
+        return Boolean(
+          progress?.visited_parks?.length ||
+          progress?.visited_sites?.length ||
+          progress?.visited_states?.length ||
+          progress?.completed_temples?.length ||
+          progress?.visited_church_history?.length ||
+          Object.keys(progress?.place_memories || {}).length
+        );
+      }
+
+      function replaceSet(target, values) {
+        target.clear();
+        (Array.isArray(values) ? values : []).forEach((value) => {
+          if (value) target.add(value);
+        });
+      }
+
+      function replaceObject(target, values) {
+        Object.keys(target).forEach((key) => delete target[key]);
+        Object.entries(values && typeof values === "object" && !Array.isArray(values) ? values : {}).forEach(([key, value]) => {
+          target[key] = value;
+        });
+      }
+
+      function applyProgress(progress) {
+        replaceSet(visited, progress?.visited_parks);
+        replaceSet(visitedSites, progress?.visited_sites);
+        replaceSet(statesVisited, progress?.visited_states);
+        replaceSet(templeComplete, progress?.completed_temples);
+        replaceSet(churchHistoryVisited, progress?.visited_church_history);
+        replaceObject(placeMemories, progress?.place_memories);
+      }
+
+      function currentProgressPayload() {
+        if (!currentUser) return null;
+        return {
+          profile_id: currentUser.id,
+          user_id: currentUser.id,
+          visited_parks: [...visited],
+          visited_sites: [...visitedSites],
+          visited_states: [...statesVisited],
+          completed_temples: [...templeComplete],
+          visited_church_history: [...churchHistoryVisited],
+          place_memories: placeMemories,
+          updated_at: new Date().toISOString()
+        };
+      }
+
+      function getProgressClient() {
+        if (progressClient) return progressClient;
+        if (!window.supabase?.createClient) return null;
+        progressClient = window.supabase.createClient(supabaseUrl, supabasePublishableKey);
+        return progressClient;
+      }
+
+      async function saveProgressToSupabase() {
+        if (!currentUser) return false;
+        const client = getProgressClient();
+        if (!client) throw new Error("Supabase client is not available.");
+        const payload = currentProgressPayload();
+        progressSaveInFlight = progressSaveInFlight.catch(() => {}).then(async () => {
+          const { error } = await client
+            .from(progressTable)
+            .upsert(payload, { onConflict: "profile_id" });
+          if (error) throw error;
+          return true;
+        });
+        return progressSaveInFlight;
+      }
+
+      function queueProgressSave() {
+        if (!currentUser) {
+          requireAuthenticatedUser();
+          return;
+        }
+        window.clearTimeout(progressSaveTimer);
+        progressSaveTimer = window.setTimeout(() => {
+          saveProgressToSupabase().catch((error) => {
+            console.warn("Could not save progress to Supabase", error);
+          });
+        }, 180);
+      }
+
+      async function loadProgressFromSupabase() {
+        const client = getProgressClient();
+        const legacyProgress = legacyProgressFromBrowser();
+        if (!currentUser) {
+          applyProgress({});
+          return;
+        }
+        if (!client) {
+          applyProgress(legacyProgress);
+          return;
+        }
+
+        try {
+          const { data, error } = await client
+            .from(progressTable)
+            .select("visited_parks, visited_sites, visited_states, completed_temples, visited_church_history, place_memories")
+            .eq("user_id", currentUser.id)
+            .maybeSingle();
+          if (error) throw error;
+          const progress = data || {};
+          if (progressHasData(progress)) {
+            applyProgress(progress);
+            return;
+          }
+          applyProgress(legacyProgress);
+          if (progressHasData(legacyProgress)) await saveProgressToSupabase();
+        } catch (error) {
+          console.warn("Could not load progress from Supabase; using browser progress if available.", error);
+          applyProgress(legacyProgress);
+        }
+      }
+
+      function setAuthStatus(message) {
+        authStatus.textContent = message || "";
+      }
+
+      function renderAuth() {
+        const signedIn = Boolean(currentUser);
+        authForm.hidden = signedIn;
+        authSession.hidden = !signedIn;
+        authUser.textContent = signedIn ? currentUser.email || "Signed in" : "";
+        setAuthStatus(signedIn ? "Your pins are saving to your account." : "Sign in to save your own pins.");
+      }
+
+      function requireAuthenticatedUser() {
+        if (currentUser) return true;
+        setAuthStatus("Sign in before saving pins, notes, or photos.");
+        return false;
+      }
+
+      async function refreshProgressForSession(session) {
+        currentUser = session?.user || null;
+        renderAuth();
+        await loadProgressFromSupabase();
+        render();
+      }
+
+      async function handleSignIn() {
+        const client = getProgressClient();
+        if (!client) return;
+        signInButton.disabled = true;
+        signUpButton.disabled = true;
+        setAuthStatus("Signing in...");
+        try {
+          const { error } = await client.auth.signInWithPassword({
+            email: authEmail.value.trim(),
+            password: authPassword.value
+          });
+          if (error) throw error;
+          authPassword.value = "";
+        } catch (error) {
+          setAuthStatus(error.message || "Could not sign in.");
+        } finally {
+          signInButton.disabled = false;
+          signUpButton.disabled = false;
+        }
+      }
+
+      async function handleSignUp() {
+        const client = getProgressClient();
+        if (!client) return;
+        signInButton.disabled = true;
+        signUpButton.disabled = true;
+        setAuthStatus("Creating account...");
+        try {
+          const { data, error } = await client.auth.signUp({
+            email: authEmail.value.trim(),
+            password: authPassword.value
+          });
+          if (error) throw error;
+          authPassword.value = "";
+          if (data.session) {
+            await refreshProgressForSession(data.session);
+          } else {
+            setAuthStatus("Check your email to confirm your account, then sign in.");
+          }
+        } catch (error) {
+          setAuthStatus(error.message || "Could not create account.");
+        } finally {
+          signInButton.disabled = false;
+          signUpButton.disabled = false;
+        }
+      }
+
+      async function handleSignOut() {
+        const client = getProgressClient();
+        if (!client) return;
+        signOutButton.disabled = true;
+        setAuthStatus("Signing out...");
+        try {
+          const { error } = await client.auth.signOut();
+          if (error) throw error;
+        } catch (error) {
+          setAuthStatus(error.message || "Could not sign out.");
+        } finally {
+          signOutButton.disabled = false;
+        }
+      }
 
       function saveVisited() {
-        localStorage.setItem(storageKey, JSON.stringify([...visited]));
+        queueProgressSave();
       }
 
       function saveVisitedSites() {
-        localStorage.setItem(npsStorageKey, JSON.stringify([...visitedSites]));
+        queueProgressSave();
       }
 
       function saveStatesVisited() {
-        localStorage.setItem(statesVisitedKey, JSON.stringify([...statesVisited]));
+        queueProgressSave();
       }
 
       function saveTempleComplete() {
-        localStorage.setItem(templeCompleteKey, JSON.stringify([...templeComplete]));
+        queueProgressSave();
       }
 
       function saveChurchHistoryVisited() {
-        localStorage.setItem(churchHistoryVisitedKey, JSON.stringify([...churchHistoryVisited]));
+        queueProgressSave();
       }
 
-      function savePlaceMemories() {
+      async function savePlaceMemories() {
+        if (!requireAuthenticatedUser()) return false;
         try {
-          localStorage.setItem(placeMemoriesKey, JSON.stringify(placeMemories));
+          await saveProgressToSupabase();
           return true;
         } catch (error) {
           console.warn("Could not save place memory", error);
@@ -1553,7 +1887,7 @@
       }
 
       async function savePlaceMemoryFromPopup(popup, placeKey, options = {}) {
-        if (!popup) return false;
+        if (!popup || !requireAuthenticatedUser()) return false;
         const { photoInput } = getPlaceMemoryControls(popup, placeKey);
         if (!capturePlaceNoteFromPopup(popup, placeKey)) return false;
         const selectedPhoto = photoInput?.files?.[0];
@@ -1625,6 +1959,7 @@
 
         if (noteField) {
           noteField.oninput = () => {
+            if (!requireAuthenticatedUser()) return;
             const limitedNote = limitWords(noteField.value);
             if (limitedNote !== noteField.value) noteField.value = limitedNote;
             capturePlaceNoteFromPopup(popup, placeKey);
@@ -1650,6 +1985,7 @@
 
         if (photoInput) {
           photoInput.onchange = async () => {
+            if (!requireAuthenticatedUser()) return;
             const file = photoInput.files?.[0];
             if (!file) return;
             capturePlaceNoteFromPopup(popup, placeKey);
@@ -1953,6 +2289,7 @@
       }
 
       function toggleVisited(parkName) {
+        if (!requireAuthenticatedUser()) return;
         const unit = allUnits.find((item) => item.name === parkName);
         if (!unit) return;
         if (unit.type === "park") {
@@ -2085,6 +2422,10 @@
       }
 
       function toggleStateVisited(state, shape) {
+        if (!requireAuthenticatedUser()) {
+          render();
+          return;
+        }
         if (statesVisited.has(state.name)) statesVisited.delete(state.name);
         else statesVisited.add(state.name);
         saveStatesVisited();
@@ -2163,6 +2504,7 @@
             bindPlaceMemoryControls(popup, `temple:${temple.name}`);
             if (completeButton) {
               completeButton.onclick = () => {
+                if (!requireAuthenticatedUser()) return;
                 if (templeComplete.has(temple.name)) templeComplete.delete(temple.name);
                 else templeComplete.add(temple.name);
                 saveTempleComplete();
@@ -2179,6 +2521,7 @@
       }
 
       function toggleChurchHistoryVisited(siteName) {
+        if (!requireAuthenticatedUser()) return;
         if (churchHistoryVisited.has(siteName)) churchHistoryVisited.delete(siteName);
         else churchHistoryVisited.add(siteName);
         saveChurchHistoryVisited();
@@ -2356,6 +2699,19 @@
         }
       });
 
+      authForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        handleSignIn();
+      });
+
+      signUpButton.addEventListener("click", () => {
+        handleSignUp();
+      });
+
+      signOutButton.addEventListener("click", () => {
+        handleSignOut();
+      });
+
       closeMapQuote.addEventListener("click", () => {
         mapQuote.classList.add("hidden");
       });
@@ -2435,6 +2791,24 @@
       }
 
       async function init() {
+        renderAuth();
+        const client = getProgressClient();
+        if (client) {
+          client.auth.onAuthStateChange((event, session) => {
+            if (event === "INITIAL_SESSION" || event === "SIGNED_IN" || event === "SIGNED_OUT") {
+              refreshProgressForSession(session).catch((error) => {
+                console.error(error);
+                setAuthStatus("Could not load account progress.");
+              });
+            }
+          });
+          const { data, error } = await client.auth.getSession();
+          if (error) console.warn(error);
+          await refreshProgressForSession(data?.session || null);
+        } else {
+          await loadProgressFromSupabase();
+          render();
+        }
         loadStateBoundaries().catch((error) => console.error(error));
         try {
           const apiKey = await loadApiKeyFromEnv();
@@ -2442,10 +2816,8 @@
         } catch (error) {
           console.error(error);
         }
-        render();
       }
 
-      render();
       init();
     </script>
   </body>

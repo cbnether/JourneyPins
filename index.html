@@ -2138,6 +2138,11 @@
         closeButton: true,
         autoPanPadding: L.point(48, 48)
       };
+      const markerTooltipOptions = {
+        direction: "top",
+        offset: L.point(0, -8),
+        opacity: 0.96
+      };
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 18,
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -2854,7 +2859,7 @@
           weight: isVisited ? 1.4 : 2,
           fillColor: isVisited ? "#f7cfd8" : color,
           fillOpacity: isVisited ? 0.75 : 0.85
-        }).bindPopup(popupMarkup(park), popupOptions);
+        }).bindTooltip(park.name, markerTooltipOptions).bindPopup(popupMarkup(park), popupOptions);
       }
 
       function popupMarkup(park) {
@@ -3113,7 +3118,7 @@
             weight: isVisited ? 1.4 : 2,
             fillColor: isVisited ? "#cfe8ff" : color,
             fillOpacity: isVisited ? 0.75 : 0.85
-          }).addTo(npsLayer);
+          }).bindTooltip(park.name, markerTooltipOptions).addTo(npsLayer);
           markersByName.set(park.name, marker);
           marker.bindPopup(popupMarkup(park), popupOptions);
           marker.on("popupopen", (event) => {
@@ -3201,7 +3206,7 @@
             weight: isComplete ? 1.4 : 2,
             fillColor: isComplete ? "#fff1b8" : color,
             fillOpacity: 0.9
-          }).addTo(templeLayer);
+          }).bindTooltip(temple.name, markerTooltipOptions).addTo(templeLayer);
           markersByName.set(temple.name, marker);
           marker.bindPopup(templePopupMarkup(temple), popupOptions);
           marker.on("popupopen", (event) => {
@@ -3250,7 +3255,7 @@
             weight: isVisited ? 1.4 : 2,
             fillColor: isVisited ? "#f0d7e9" : color,
             fillOpacity: isVisited ? 0.78 : 0.9
-          }).addTo(churchLayer);
+          }).bindTooltip(site.name, markerTooltipOptions).addTo(churchLayer);
           markersByName.set(site.name, marker);
           marker.bindPopup(churchPopupMarkup(site), popupOptions);
           marker.on("popupopen", (event) => {

@@ -244,7 +244,10 @@
       }
 
       .metric {
-        padding: 14px;
+        display: flex;
+        align-items: baseline;
+        gap: 6px;
+        padding: 10px 12px;
         border-radius: 18px;
         background:
           linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(243, 234, 217, 0.82));
@@ -253,11 +256,15 @@
       }
 
       .metric strong {
-        display: block;
+        display: inline;
         font-family: "Outfit", "Manrope", sans-serif;
         font-size: 1.75rem;
         line-height: 1;
-        margin-bottom: 4px;
+      }
+
+      .metric-label {
+        color: var(--muted);
+        font-size: 0.88rem;
       }
 
       .list {
@@ -379,6 +386,11 @@
         gap: 10px;
       }
 
+      .filter-actions .button {
+        padding: 8px;
+        font-size: 0.82rem;
+      }
+
       .share-title {
         color: var(--muted);
         font-size: 0.82rem;
@@ -389,6 +401,10 @@
 
       .share-actions {
         display: block;
+      }
+
+      .checklist-actions {
+        margin-top: 8px;
       }
 
       .share-button {
@@ -415,19 +431,8 @@
         font-size: 0.8rem;
       }
 
-      .map-share-box {
-        position: absolute;
-        left: 24px;
-        bottom: 40px;
-        z-index: 600;
-      }
-
-      .map-share-box .share-button {
-        width: auto;
-        max-width: 100%;
-        padding: 8px 13px;
-        font-size: 0.78rem;
-        white-space: nowrap;
+      .screen-cap-actions {
+        margin-top: 8px;
       }
 
       .auth-card {
@@ -975,13 +980,7 @@
         display: flex;
         gap: 8px;
         flex-wrap: wrap;
-        justify-content: space-between;
-      }
-
-      .category-controls .checklist-launcher {
-        background: rgba(255, 255, 255, 0.84);
-        color: var(--green-deep);
-        border: 1px solid rgba(44, 120, 80, 0.2);
+        justify-content: flex-end;
       }
 
       .toggle-row {
@@ -1206,6 +1205,283 @@
         color: var(--muted);
       }
 
+      @media (min-width: 981px) {
+        .app {
+          height: 100vh;
+          min-height: 100vh;
+        }
+
+        .sidebar {
+          height: 100vh;
+          overflow-y: hidden;
+          padding: 16px;
+        }
+      }
+
+      @media (min-width: 981px) and (max-height: 820px) {
+        .sidebar {
+          padding: 12px;
+        }
+
+        .brand-lockup {
+          gap: 8px;
+          margin-bottom: 6px;
+        }
+
+        .brand-mark {
+          width: 50px;
+          height: 50px;
+          border-radius: 17px;
+        }
+
+        .brand-mark::after {
+          left: 13px;
+          top: 10px;
+          width: 23px;
+          height: 28px;
+        }
+
+        .brand-mark::before {
+          inset: 4px;
+          border-radius: 14px;
+        }
+
+        h1 {
+          font-size: 2.35rem;
+        }
+
+        .tagline {
+          margin-top: 4px;
+          font-size: 0.76rem;
+        }
+
+        .subtitle {
+          font-size: 0.82rem;
+          line-height: 1.2;
+        }
+
+        .card {
+          margin-top: 8px;
+          padding: 10px;
+          border-radius: 16px;
+        }
+
+        .auth-card {
+          margin-top: 6px;
+          padding: 8px;
+          gap: 5px;
+        }
+
+        .auth-form {
+          gap: 5px;
+        }
+
+        .auth-input {
+          padding: 6px 9px;
+          font-size: 0.84rem;
+        }
+
+        .auth-row {
+          gap: 5px;
+        }
+
+        .auth-row .button {
+          padding: 6px 8px;
+          font-size: 0.78rem;
+        }
+
+        .category-tab-row {
+          flex-wrap: wrap;
+          gap: 6px;
+          margin-top: 8px;
+          padding: 6px;
+          border-radius: 20px;
+        }
+
+        .category-tab-button {
+          flex: 0 0 calc((100% - 12px) / 3);
+          min-height: 52px;
+          padding: 11px 8px;
+          border-radius: 15px;
+          gap: 8px;
+          font-size: 0.82rem;
+        }
+
+        .category-tab {
+          padding: 8px;
+          border-radius: 16px;
+        }
+
+        .category-panel {
+          padding-top: 4px;
+        }
+
+        .category-controls {
+          gap: 6px;
+        }
+
+        .category-controls .button {
+          padding: 6px 9px;
+          font-size: 0.78rem;
+        }
+
+        .progress-card {
+          gap: 6px;
+          margin-top: 4px;
+        }
+
+        .metric {
+          padding: 8px;
+          border-radius: 14px;
+        }
+
+        .metric strong {
+          font-size: 1.45rem;
+        }
+
+        .metric-label {
+          font-size: 0.78rem;
+        }
+
+        .filter-actions {
+          gap: 6px;
+        }
+
+        .share-actions {
+          margin-top: 6px !important;
+        }
+
+        .filter-actions .button,
+        .share-button {
+          padding: 7px 9px;
+          font-size: 0.8rem;
+        }
+      }
+
+      @media (min-width: 981px) and (min-height: 641px) and (max-height: 820px) {
+        .sidebar {
+          padding: 16px;
+          padding-bottom: 0;
+        }
+
+        .brand-lockup {
+          margin-bottom: 10px;
+        }
+
+        .card {
+          margin-top: 10px;
+          padding: 12px;
+          border-radius: 18px;
+        }
+
+        .auth-card {
+          margin-top: 8px;
+          padding: 10px;
+          gap: 6px;
+        }
+
+        .auth-form {
+          gap: 6px;
+        }
+
+        .auth-input {
+          padding: 7px 10px;
+        }
+
+        .auth-row {
+          gap: 6px;
+        }
+
+        .auth-row .button {
+          padding: 7px 10px;
+          font-size: 0.8rem;
+        }
+
+        .category-tab-button {
+          min-height: 54px;
+        }
+
+        .category-tab {
+          padding: 10px;
+        }
+
+        .category-panel {
+          padding-top: 6px;
+        }
+
+        .progress-card {
+          gap: 8px;
+          margin-top: 6px;
+        }
+
+        .metric {
+          padding: 10px;
+        }
+
+        .filter-actions .button,
+        .share-button {
+          padding: 7px 10px;
+          font-size: 0.8rem;
+        }
+
+        .sidebar > .card:last-of-type {
+          margin-top: 8px;
+          padding: 8px 12px;
+        }
+
+        .checklist-actions,
+        .screen-cap-actions {
+          margin-top: 4px !important;
+        }
+      }
+
+      @media (min-width: 981px) and (max-height: 640px) {
+        .sidebar {
+          padding-bottom: 0;
+        }
+
+        .category-tab-row {
+          gap: 3px;
+          margin-top: 5px;
+          padding: 3px;
+        }
+
+        .category-tab-button {
+          min-height: 44px;
+          padding: 7px;
+        }
+
+        .category-tab {
+          padding: 4px;
+        }
+
+        .category-panel {
+          padding-top: 0;
+        }
+
+        .card {
+          margin-top: 5px;
+        }
+
+        .sidebar > .card:last-of-type {
+          padding: 4px 8px;
+        }
+
+        .filter-actions .button,
+        .share-button {
+          padding: 5px 8px;
+          font-size: 0.74rem;
+        }
+
+        .screen-cap-actions {
+          margin-top: 3px !important;
+        }
+
+        .sidebar > .card:last-of-type .share-actions {
+          margin-top: 3px !important;
+        }
+      }
+
       @media (max-width: 980px) {
         .app {
           grid-template-columns: 1fr;
@@ -1317,7 +1593,6 @@
             <div class="category-panel active" data-category-panel="parks">
               <div class="category-tab">
                 <div class="category-controls">
-                  <button class="button checklist-launcher" data-checklist-open="parks">Checklist</button>
                   <button class="button brand-all" data-toggle-all-categories>All off</button>
                 </div>
                 <div class="progress-card" id="parksProgress"></div>
@@ -1326,7 +1601,6 @@
             <div class="category-panel" data-category-panel="nps">
               <div class="category-tab">
                 <div class="category-controls">
-                  <button class="button checklist-launcher" data-checklist-open="nps">Checklist</button>
                   <button class="button brand-all" data-toggle-all-categories>All off</button>
                 </div>
                 <div class="progress-card" id="npsProgress"></div>
@@ -1335,7 +1609,6 @@
             <div class="category-panel" data-category-panel="states">
               <div class="category-tab">
                 <div class="category-controls">
-                  <button class="button checklist-launcher" data-checklist-open="states">Checklist</button>
                   <button class="button brand-all" data-toggle-all-categories>All off</button>
                 </div>
                 <div class="progress-card" id="statesProgress"></div>
@@ -1344,7 +1617,6 @@
             <div class="category-panel" data-category-panel="temples">
               <div class="category-tab">
                 <div class="category-controls">
-                  <button class="button checklist-launcher" data-checklist-open="temples">Checklist</button>
                   <button class="button brand-all" data-toggle-all-categories>All off</button>
                 </div>
                 <div class="progress-card" id="templeProgress"></div>
@@ -1353,7 +1625,6 @@
             <div class="category-panel" data-category-panel="church">
               <div class="category-tab">
                 <div class="category-controls">
-                  <button class="button checklist-launcher" data-checklist-open="church">Checklist</button>
                   <button class="button brand-all" data-toggle-all-categories>All off</button>
                 </div>
                 <div class="progress-card" id="churchProgress"></div>
@@ -1367,18 +1638,21 @@
             <button id="openFilterModal" class="button filter-main">Filter</button>
             <button id="clearFilters" class="button secondary">Clear filters</button>
           </div>
+          <div class="share-actions checklist-actions">
+            <button id="openChecklist" class="share-button">Checklist</button>
+          </div>
           <div class="share-actions" style="margin-top:12px;">
             <button id="visitedOnlyFilter" class="share-button">Show only places I’ve been</button>
+          </div>
+          <div class="share-actions screen-cap-actions">
+            <button id="shareScreenshot" class="share-button">Save screen cap</button>
+            <span id="shareStatus" class="share-status" aria-live="polite" hidden></span>
           </div>
         </div>
       </aside>
 
       <main class="map-panel">
         <div id="map"></div>
-        <div class="map-share-box" aria-label="JourneyPins sharing">
-          <button id="shareScreenshot" class="share-button">Save screen cap</button>
-          <span id="shareStatus" aria-live="polite" hidden></span>
-        </div>
         <div class="floating-note">
           * Sign in to save your checkmarks, notes, and photos in Supabase.
         </div>
@@ -3032,11 +3306,11 @@
         return `
           <div class="metric">
             <strong>${done}</strong>
-            ${doneLabel}
+            <span class="metric-label">${doneLabel}</span>
           </div>
           <div class="metric">
             <strong>${Math.max(total - done, 0)}</strong>
-            remaining
+            <span class="metric-label">remaining</span>
           </div>
         `;
       }
@@ -3388,10 +3662,8 @@
         if (event.target.closest?.("[data-checklist-retry-save]")) retryChecklistSave();
       });
 
-      document.querySelectorAll("[data-checklist-open]").forEach((button) => {
-        button.addEventListener("click", () => {
-          openChecklist(button.dataset.checklistOpen || activeCategory);
-        });
+      document.getElementById("openChecklist").addEventListener("click", () => {
+        openChecklist(activeCategory);
       });
 
       closeChecklistButton.addEventListener("click", dismissChecklist);

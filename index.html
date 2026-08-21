@@ -3736,9 +3736,16 @@
             displaySurface: "browser"
           },
           audio: false,
-          preferCurrentTab: true
+          preferCurrentTab: true,
+          selfBrowserSurface: "include",
+          monitorTypeSurfaces: "exclude"
         });
         try {
+          const videoTrack = stream.getVideoTracks()[0];
+          const displaySurface = videoTrack?.getSettings().displaySurface;
+          if (displaySurface !== "browser") {
+            throw new Error("Select the JourneyPins browser tab to capture only the app.");
+          }
           const video = document.createElement("video");
           video.srcObject = stream;
           await new Promise((resolve) => {

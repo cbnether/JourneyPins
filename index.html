@@ -431,20 +431,16 @@
       }
 
       .auth-card {
+        margin-top: 12px;
+        padding: 12px;
+        border-radius: 18px;
         display: grid;
-        gap: 10px;
-      }
-
-      .auth-head {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 12px;
+        gap: 8px;
       }
 
       .auth-form {
         display: grid;
-        gap: 8px;
+        gap: 6px;
       }
 
       .auth-form[hidden],
@@ -454,11 +450,12 @@
 
       .auth-input {
         width: 100%;
-        padding: 11px 12px;
+        padding: 9px 11px;
         border: 1px solid var(--line);
-        border-radius: 14px;
+        border-radius: 11px;
         background: rgba(255, 255, 255, 0.92);
         font: inherit;
+        font-size: 0.88rem;
         outline: none;
       }
 
@@ -470,7 +467,12 @@
       .auth-row {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 8px;
+        gap: 6px;
+      }
+
+      .auth-row .button {
+        padding: 8px 10px;
+        font-size: 0.82rem;
       }
 
       .auth-session {
@@ -486,9 +488,13 @@
       }
 
       .auth-status {
-        min-height: 1rem;
+        display: none;
         color: var(--muted);
         font-size: 0.8rem;
+      }
+
+      .auth-status:not(:empty) {
+        display: block;
       }
 
       .filter-overlay {
@@ -1283,12 +1289,7 @@
         </div>
 
         <div class="card auth-card">
-          <div class="auth-head">
-            <div>
-              <div class="summary">Account</div>
-              <div id="authStatus" class="auth-status" aria-live="polite">Sign in to save your own pins.</div>
-            </div>
-          </div>
+          <div id="authStatus" class="auth-status" aria-live="polite"></div>
           <form id="authForm" class="auth-form">
             <input id="authEmail" class="auth-input" type="email" autocomplete="email" placeholder="Email" required />
             <input id="authPassword" class="auth-input" type="password" autocomplete="current-password" placeholder="Password" required minlength="6" />
@@ -2419,7 +2420,7 @@
         authForm.hidden = signedIn;
         authSession.hidden = !signedIn;
         authUser.textContent = signedIn ? currentUser.email || "Signed in" : "";
-        setAuthStatus(signedIn ? "Your pins are saving to your account." : "Sign in to save your own pins.");
+        setAuthStatus("");
       }
 
       function requireAuthenticatedUser() {

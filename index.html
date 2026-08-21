@@ -379,12 +379,6 @@
         gap: 10px;
       }
 
-      .share-box {
-        margin-top: 12px;
-        display: grid;
-        gap: 10px;
-      }
-
       .share-title {
         color: var(--muted);
         font-size: 0.82rem;
@@ -419,6 +413,21 @@
         min-height: 1rem;
         color: var(--muted);
         font-size: 0.8rem;
+      }
+
+      .map-share-box {
+        position: absolute;
+        left: 24px;
+        bottom: 40px;
+        z-index: 600;
+      }
+
+      .map-share-box .share-button {
+        width: auto;
+        max-width: 100%;
+        padding: 8px 13px;
+        font-size: 0.78rem;
+        white-space: nowrap;
       }
 
       .auth-card {
@@ -1360,17 +1369,15 @@
           <div class="share-actions" style="margin-top:12px;">
             <button id="visitedOnlyFilter" class="share-button">Show only places I’ve been</button>
           </div>
-          <div class="share-box">
-            <div class="share-actions">
-              <button id="shareScreenshot" class="share-button">Save screen cap - share with your friends</button>
-            </div>
-            <div id="shareStatus" class="share-status" aria-live="polite">Choose the JourneyPins tab to save the screen exactly as shown.</div>
-          </div>
         </div>
       </aside>
 
       <main class="map-panel">
         <div id="map"></div>
+        <div class="map-share-box" aria-label="JourneyPins sharing">
+          <button id="shareScreenshot" class="share-button">Save screen cap</button>
+          <span id="shareStatus" aria-live="polite" hidden></span>
+        </div>
         <div class="floating-note">
           * Sign in to save your checkmarks, notes, and photos in Supabase.
         </div>
@@ -2186,6 +2193,8 @@
       const markersByName = new Map();
       const search = document.getElementById("search");
       const filters = document.getElementById("stateFilters");
+      const appShell = document.querySelector(".app");
+      const sidebar = document.querySelector(".sidebar");
       const openFilterModal = document.getElementById("openFilterModal");
       const filterOverlay = document.getElementById("filterOverlay");
       const clearFilters = document.getElementById("clearFilters");
@@ -3429,6 +3438,11 @@
         URL.revokeObjectURL(url);
       }
 
+      function scrollJourneyPinsToTop() {
+        window.scrollTo({ top: 0, behavior: "auto" });
+        sidebar.scrollTo({ top: 0, behavior: "auto" });
+      }
+
       async function createScreenCaptureBlob() {
         if (!navigator.mediaDevices?.getDisplayMedia) {
           throw new Error("Screen capture is not supported in this browser.");
@@ -3448,13 +3462,14 @@
             video.onloadedmetadata = resolve;
             video.play();
           });
-          const appRect = document.querySelector(".app").getBoundingClientRect();
+          const appRect = appShell.getBoundingClientRect();
           const scaleX = video.videoWidth / window.innerWidth;
-          const scaleY = Math.min(scaleX, video.videoHeight / window.innerHeight);
-          const sourceWidth = Math.min(video.videoWidth, Math.round(appRect.width * scaleX));
-          const sourceHeight = Math.min(video.videoHeight, Math.round(appRect.height * scaleY));
+          const scaleY = video.videoHeight / window.innerHeight;
           const sourceX = Math.max(0, Math.round(appRect.left * scaleX));
-          const sourceY = Math.max(0, video.videoHeight - sourceHeight);
+          const sourceY = Math.max(0, Math.round(appRect.top * scaleY));
+          const sourceWidth = Math.min(video.videoWidth - sourceX, Math.round(appRect.width * scaleX));
+          const sourceHeight = Math.min(video.videoHeight - sourceY, Math.round(appRect.height * scaleY));
+          if (sourceWidth <= 0 || sourceHeight <= 0) throw new Error("JourneyPins is outside the capture area.");
           const canvas = document.createElement("canvas");
           canvas.width = sourceWidth;
           canvas.height = sourceHeight;
@@ -3487,6 +3502,7 @@
       shareScreenshotButton.addEventListener("click", async () => {
         shareScreenshotButton.disabled = true;
         try {
+          scrollJourneyPinsToTop();
           await saveScreenshot();
         } catch (error) {
           console.error(error);

@@ -845,6 +845,18 @@
         gap: 10px;
       }
 
+      .category-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .category-heading .button {
+        padding: 7px 12px;
+        font-size: 0.78rem;
+      }
+
       .category-tab-row {
         display: flex;
         flex-wrap: wrap;
@@ -1298,6 +1310,11 @@
           border-radius: 20px;
         }
 
+        .category-heading .button {
+          padding: 6px 9px;
+          font-size: 0.76rem;
+        }
+
         .category-tab-button {
           flex: 0 0 calc((100% - 12px) / 3);
           min-height: 52px;
@@ -1446,6 +1463,11 @@
           padding: 3px;
         }
 
+        .category-heading .button {
+          padding: 5px 8px;
+          font-size: 0.72rem;
+        }
+
         .category-tab-button {
           min-height: 44px;
           padding: 7px;
@@ -1581,7 +1603,10 @@
         </div>
 
         <div class="card">
-          <div class="summary">Categories</div>
+          <div class="category-heading">
+            <div class="summary">Categories</div>
+            <button id="toggleAllCategories" class="button brand-all" data-toggle-all-categories>All on</button>
+          </div>
           <div class="category-tab-row">
             <button class="category-tab-button active" data-category-tab="parks">National Parks</button>
             <button class="category-tab-button" data-category-tab="nps">NPS Sites</button>
@@ -1592,41 +1617,26 @@
           <div class="category-tabs">
             <div class="category-panel active" data-category-panel="parks">
               <div class="category-tab">
-                <div class="category-controls">
-                  <button class="button brand-all" data-toggle-all-categories>All off</button>
-                </div>
                 <div class="progress-card" id="parksProgress"></div>
               </div>
             </div>
             <div class="category-panel" data-category-panel="nps">
               <div class="category-tab">
-                <div class="category-controls">
-                  <button class="button brand-all" data-toggle-all-categories>All off</button>
-                </div>
                 <div class="progress-card" id="npsProgress"></div>
               </div>
             </div>
             <div class="category-panel" data-category-panel="states">
               <div class="category-tab">
-                <div class="category-controls">
-                  <button class="button brand-all" data-toggle-all-categories>All off</button>
-                </div>
                 <div class="progress-card" id="statesProgress"></div>
               </div>
             </div>
             <div class="category-panel" data-category-panel="temples">
               <div class="category-tab">
-                <div class="category-controls">
-                  <button class="button brand-all" data-toggle-all-categories>All off</button>
-                </div>
                 <div class="progress-card" id="templeProgress"></div>
               </div>
             </div>
             <div class="category-panel" data-category-panel="church">
               <div class="category-tab">
-                <div class="category-controls">
-                  <button class="button brand-all" data-toggle-all-categories>All off</button>
-                </div>
                 <div class="progress-card" id="churchProgress"></div>
               </div>
             </div>

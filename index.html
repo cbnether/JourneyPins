@@ -3480,6 +3480,7 @@
           onEachFeature: (feature, shape) => {
             const state = stateFromFeature(feature);
             if (!state) return;
+            shape.bindTooltip(state.name, markerTooltipOptions);
             shape.bindPopup(statePopupMarkup(state), popupOptions);
             shape.on({
               mouseover: () => shape.setStyle({ weight: 2.6, fillOpacity: statesVisited.has(state.name) ? 0.82 : 0.13 }),

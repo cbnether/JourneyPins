@@ -6,8 +6,7 @@
     <title>JourneyPins</title>
     <link
       rel="stylesheet"
-      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-      crossorigin=""
+      href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -1730,7 +1729,7 @@
     </div>
 
       <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-      <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+      <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
       <script>
       const parks = [
         { name: "Acadia National Park", states: ["ME"], lat: 44.30777545, lng: -68.30063316, type: "park" },
@@ -2416,12 +2415,33 @@
         L.latLng(17.0, -180.0),
         L.latLng(72.0, -64.0)
       );
+      const mainViewStateNames = ["California", "Montana", "Texas", "Maine", "Florida"];
+      const mainViewBounds = L.latLngBounds(
+        mainViewStateNames.map((name) => {
+          const state = stateByName.get(name);
+          return [state.lat, state.lng];
+        })
+      );
       const map = L.map("map", {
         zoomControl: true,
-        maxBounds: lower48Bounds,
+        zoomSnap: 0.25,
+        maxBounds: expandedUsBounds,
         maxBoundsViscosity: 0.9,
         minZoom: 3
-      }).setView([39.5, -98.35], 4);
+      });
+      const focusLower48 = () => {
+        map.fitBounds(lower48Bounds, {
+          padding: [18, 18],
+          maxZoom: 5
+        });
+        const center = map.getCenter();
+        map.setView([center.lat - 4, center.lng], map.getZoom(), { animate: false });
+      };
+      const focusMainView = () => {
+        map.fitBounds(mainViewBounds, { padding: [32, 32], maxZoom: 7 });
+      };
+      focusMainView();
+      requestAnimationFrame(focusMainView);
       let expandedMapScope = false;
       const popupOptions = {
         maxWidth: 300,
@@ -2435,9 +2455,9 @@
         offset: L.point(0, -8),
         opacity: 0.96
       };
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
         maxZoom: 18,
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        attribution: 'Tiles &copy; <a href="https://www.esri.com/" target="_blank" rel="noopener">Esri</a>'
       }).addTo(map);
 
       const mapScopeControl = L.control({ position: "topright" });
@@ -2453,16 +2473,15 @@
         L.DomEvent.disableClickPropagation(container);
         L.DomEvent.on(button, "click", () => {
           expandedMapScope = !expandedMapScope;
-          const bounds = expandedMapScope ? expandedUsBounds : lower48Bounds;
-          map.setMaxBounds(bounds);
-          if (expandedMapScope) map.fitBounds(bounds, { padding: [18, 18] });
-          else map.setView([39.5, -98.35], 4);
+          map.setMaxBounds(expandedUsBounds);
+          if (expandedMapScope) map.fitBounds(expandedUsBounds, { padding: [18, 18] });
+          else focusLower48();
           syncButton();
         });
         L.DomEvent.on(zoomOutButton, "click", () => {
           expandedMapScope = false;
-          map.setMaxBounds(lower48Bounds);
-          map.setView([39.5, -98.35], 4);
+          map.setMaxBounds(expandedUsBounds);
+          focusLower48();
           syncButton();
         });
         return container;
